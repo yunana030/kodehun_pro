@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout/layout.html}">
+<head>
+    <meta charset="UTF-8">
+    <title>자유게시판</title>
+</head>
+
+<div layout:fragment="content">
+    <section id="about">
+        <!-- 검색 폼 -->
+        <form action="/free/list" method="get">
+            <input type="hidden" name="size" th:value="${pageRequestDTO.size}">
+            <div class="search-area">
+                <div class="yuna-search-wrapper">
+                    <select class="yuna-search-type" name="type">
+                        <option value="">----</option>
+                        <option value="t" th:selected="${pageRequestDTO.type=='t'}">제목</option>
+                        <option value="c" th:selected="${pageRequestDTO.type=='c'}">내용</option>
+                        <option value="w" th:selected="${pageRequestDTO.type=='w'}">작성자</option>
+                        <option value="tc" th:selected="${pageRequestDTO.type=='tc'}">제목+내용</option>
+                        <option value="tcw" th:selected="${pageRequestDTO.type=='tcw'}">제목+내용+작성자</option>
+                    </select>
+                </div>
+                    <input type="text" name="keyword" class="yuna-search-input"
+                           th:value="${pageRequestDTO.keyword}" placeholder="검색어를 입력하세요">
+                    <button class="yuna-search-btn" type="submit">검색</button>
+                    <a class="yuna-search-btn" th:href="@{/free/list}">초기화</a>
+            </div>
+        </form>
+
+        <!-- 공지사항 -->
+        <h4>📢 공지사항</h4>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>제목</th>
+                <th>작성일</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr class="table-danger" th:each="notice : ${noticeList}">
+                <td><a th:href="@{/free/notice/read(id=${notice.id})}" th:text="${notice.title}"></a></td>
+                <td th:text="${#temporals.format(notice.regDate, 'yyyy-MM-dd HH:mm')}"></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(noticeList)}">
+                <td colspan="2" class="text-center text-muted py-3">등록된 공지사항이 없습니다.</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- 자유게시판 -->
+        <h4>💬 자유게시판</h4>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>번호</th>
+                <th>제목</th>
+                <th>작성자</th>
+                <th>등록일</th>
+                <th>조회수</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="free:${responseDTO.dtoList}">
+                <td th:text="${free.id}"></td>
+                <td>
+                    <a th:href="|@{/free/read(id=${free.id},mode=1)}&${pageRequestDTO.getLink()}|"
+                       th:text="${free.title}"></a>
+                </td>
+                <td th:text="${free.writer}"></td>
+                <td th:text="${#temporals.format(free.regDate,'yyyy-MM-dd HH:mm')}"></td>
+                <td th:text="${free.readCount}"></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- 페이지 -->
+        <div class="text-center mb-3">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:if="${responseDTO.prev}">
+                    <a class="page-link"
+                       th:href="|@{/free/list(page=${responseDTO.start-1})}&${pageRequestDTO.getLink()}|">Previous</a>
+                </li>
+
+                <th:block th:each="i:${#numbers.sequence(responseDTO.start, responseDTO.end)}">
+                    <li th:class="${responseDTO.page==i} ? 'page-item active' : 'page-item'">
+                        <a class="page-link"
+                           th:href="|@{/free/list(page=${i})}&${pageRequestDTO.getLink()}|"
+                           th:text="${i}"></a>
+                    </li>
+                </th:block>
+
+                <li class="page-item" th:if="${responseDTO.next}">
+                    <a class="page-link"
+                       th:href="|@{/free/list(page=${responseDTO.end+1})}&${pageRequestDTO.getLink()}|">Next</a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- 글 등록 버튼 -->
+        <div class="text-end">
+            <a th:href="@{/free/register}" class="reallywant">글 등록</a>
+        </div>
+    </section>
+    <style>
+        /* 전체 섹션 */
+        section#about {
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* 컨텐츠가 적으면 중앙 정렬 */
+            min-height: 77vh;        /* 화면보다 작으면 중앙 정렬 */
+            padding: 3rem 1rem 2rem;
+            width: 90%;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* 검색 폼, 테이블 등 컨텐츠 영역이 많아지면 자연스럽게 페이지 스크롤 발생 */
+        .search-area, .table, .text-end {
+            width: 100%;
+        }
+
+        /* 제목 스타일 */
+        h4 {
+            font-weight: 600;
+            color: #333;
+            margin-top: 10px;
+            margin-bottom: 0;
+        }
+
+        .search-area {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.5rem;
+            gap: 0.5rem;
+        }
+
+        /* 테이블 스타일 */
+        .table {
+            border-radius: 25%;
+            width: 100%;
+            margin-top: 1rem;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        .table thead {
+            background-color: #f8f9fa;
+        }
+
+        .table th, .table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e9ecef;
+            text-align: left;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f1f3f5;
+            transition: background-color 0.2s ease;
+        }
+
+        .table a {
+            text-decoration: none;
+            color: #212529;
+            transition: color 0.2s;
+        }
+
+        .table a:hover {
+            color: #0d6efd;
+        }
+
+        /* 공지사항 강조 */
+        tr.table-danger {
+            background-color: #fff5f5 !important;
+        }
+
+        tr.table-danger a {
+            font-weight: 600;
+            color: #b02a37;
+        }
+
+        tr.table-danger:hover {
+            background-color: #ffe3e3 !important;
+        }
+    </style>
+
+</div>
+</html>

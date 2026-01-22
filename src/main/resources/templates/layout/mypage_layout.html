@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout.html}">
+<head>
+    <title>마이페이지</title>
+</head>
+
+<div layout:fragment="content">
+
+    <style>
+        /* 레이아웃 */
+        .mypage-wrap{display:grid;grid-template-columns:220px 1fr;gap:24px;min-height:70vh}
+        .mypage-sidebar{
+            border-right:1px solid #eaeaea;
+            padding:75px 12px 16px 12px}
+        .mypage-sidebar a{
+            display:block;
+            padding:30px 10px 12px 10px;
+            border-radius:10px;
+            color:#333;
+            text-decoration:none;
+            margin-bottom:6px}
+        .mypage-sidebar a.active,
+        .mypage-sidebar a:hover{background:#f3f6ff;color:#2b59ff;font-weight:600}
+
+        .mypage-main{background:#fff;border-radius:18px;box-shadow:0 6px 20px rgba(0,0,0,.06);padding:24px}
+
+        /* 프로필 카드 */
+        .profile-top{display:flex;gap:20px;align-items:center;margin-bottom:18px}
+
+        .profile-name{font-size:20px;font-weight:700}
+        .profile-username{color:#6b7280;font-size:14px}
+
+        /* 폼 */
+        .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+        .form-grid .full{grid-column:1/-1}
+        .label{color:#6b7280;margin-bottom:6px}
+        .ip{width:100%;height:44px;border:1px solid #e5e7eb;border-radius:12px;padding:0 12px;outline:none}
+        .ip:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+        .btn-row{display:flex;gap:10px;margin-top:18px}
+        .btn-primary{background:#3b82f6;color:#fff;border:none;border-radius:12px;padding:10px 16px;cursor:pointer}
+        .btn-ghost{background:#f3f4f6;color:#374151;border:none;border-radius:12px;padding:10px 16px;cursor:pointer}
+        .btn-danger{background:#ef4444;color:#fff;border:none;border-radius:12px;padding:10px 16px;cursor:pointer;margin-left:auto}
+
+        /* 섹션 구분 */
+        .section-title{font-weight:700;margin:18px 0 10px}
+        .fine{font-size:12px;color:#6b7280}
+
+        @media (max-width: 980px){
+            .mypage-wrap{grid-template-columns:1fr}
+            .form-grid{grid-template-columns:1fr}
+        }
+    </style>
+
+    <div class="mypage-wrap">
+        <!-- 왼쪽 사이드 -->
+        <aside class="mypage-sidebar">
+            <a th:href="@{/mypage}" class="active">내 정보 보기</a>
+            <a th:href="@{/mypage/favoritelist}">찜하기</a>
+            <a th:href="@{/mypage/written}">내 게시물 관리</a>
+
+        </aside>
+
+        <!-- 오른쪽 본문 -->
+        <main>
+            <div layout:fragment="mypage_content">
+<!--                <div th:replace="~{'mypage/written' :: mypage_content}"></div>-->
+            </div>
+        </main>
+    </div>
+</div>

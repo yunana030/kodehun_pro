@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="resourcesSection">
+
+    <section id="main-resources" class="py-5">
+
+        <!-- 1. 카테고리 탭 -->
+        <div class="resource-tabs mb-4 text-center">
+            <a th:href="@{/}"
+               th:classappend="${category == null} ? 'active'"
+               class="reallywant">전체보기</a>
+
+            <a th:href="@{/(category='TOUR')}"
+               th:classappend="${category?.name() == 'TOUR'} ? 'active'"
+               class="reallywant">TOUR</a>
+
+            <a th:href="@{/(category='HOTEL')}"
+               th:classappend="${category?.name() == 'HOTEL'} ? 'active'"
+               class="reallywant">HOTEL</a>
+
+            <a th:href="@{/(category='CAFE')}"
+               th:classappend="${category?.name() == 'CAFE'} ? 'active'"
+               class="reallywant">CAFE</a>
+
+            <a th:href="@{/(category='RESTR')}"
+               th:classappend="${category?.name() == 'RESTR'} ? 'active'"
+               class="reallywant">RESTR</a>
+        </div>
+
+        <!-- 2. 카드 리스트 → place_list 스타일 그대로 복사 -->
+        <div class="container">
+            <div class="resource-list">
+                <div th:each="place : ${places}" class="resource-card">
+
+                    <!-- 이미지 클릭 -->
+                    <a th:href="@{/place/view/{id}(id=${place.id})}" style="display: block;">
+                        <div class="resource-image">
+                            <div class="resource-thumbnail"
+                                 th:if="${place.images != null and !place.images.isEmpty()}"
+                                 th:style="'background-image: url(' + @{/uploads/} + ${place.images[0].uuid} + '_' + ${place.images[0].fileName} + ')'">
+                            </div>
+                            <!-- 플레이스홀더 없음 (place_list에도 없으니까) -->
+                        </div>
+                    </a>
+
+                    <!-- 텍스트 클릭 -->
+                    <a th:href="@{/place/view/{id}(id=${place.id})}" style="text-decoration: none;">
+                        <div class="resource-body">
+                            <h3 th:text="${place.placename}">장소명</h3>
+                            <p th:text="${place.content}">내용 전체 출력</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. 더 보기 버튼 -->
+        <div class="text-center mt-5">
+            <a th:href="@{/place/list(category=${category != null ? category.name() : ''})}">
+                <button class="reallywant btn-lg">더 보기 →</button>
+            </a>
+        </div>
+        <style>
+            .py-5{
+                margin-left: 150px;
+                margin-right: 150px;
+            }
+        </style>
+    </section>
+
+</th:block>
+</html>

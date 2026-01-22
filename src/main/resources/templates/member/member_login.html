@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout.html}">
+<div layout:fragment="content">
+    <div class="card">
+        <div class="card-body">
+            <div class="card-title">회원 로그인</div>
+            <form th:action="@{/member/loginProcess}" method="post">
+                <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <div class="mb-3">
+                    <label class="form-label">username</label>
+                    <input type="text" name="username" class="form-control" placeholder="username">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control" placeholder="password">
+                </div>
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-primary">Login</button>
+                    <a th:href="@{/member/join}">
+                        <button type="button" class="btn btn-secondary">Join</button>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<th:block layout:fragment="script">
+    <script th:if="${param.error}">
+        alert('아이디 또는 비밀번호가 올바르지 않습니다.');
+    </script>
+</th:block>
+</html>

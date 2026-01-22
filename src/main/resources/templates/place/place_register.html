@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout.html}">
+
+<head>
+    <meta charset="UTF-8">
+    <title>장소 등록</title>
+</head>
+
+<section layout:fragment="content" class="meditation-write" style="margin: 0; padding-top: 75px">
+
+    <!-- 로그인 안된 경우 -->
+    <div th:unless="${#authorization.expression('isAuthenticated()')}"
+         class="text-center py-5">
+        <h3 class="text-muted mb-4">로그인 후 이용 가능합니다.</h3>
+    </div>
+    <!-- 로그인 된 경우 -->
+    <form th:if="${#authorization.expression('isAuthenticated()')}"
+          th:action="@{/place/register}"
+          method="post"
+          enctype="multipart/form-data"
+          class="glass-card"
+        style="margin-top: 30px">
+
+        <h3>장소 등록</h3>
+        <!-- 장소명 -->
+        <div class="form-group">
+            <label for="placename">장소명</label>
+            <input type="text" id="placename" name="placename" class="form-control" placeholder="장소명을 입력하세요" required>
+        </div>
+
+        <!-- 카테고리 -->
+        <div class="form-group">
+            <label for="category">카테고리</label>
+            <select id="category" name="category" class="form-select" required>
+                <option value="" selected disabled>선택하세요</option>
+                <option value="TOUR">여행</option>
+                <option value="HOTEL">호텔</option>
+                <option value="CAFE">카페</option>
+                <option value="RESTR">식당</option>
+            </select>
+        </div>
+
+        <!-- 시도 -->
+        <div class="form-group">
+            <label for="sido">시도</label>
+            <select id="sido" name="sido" class="form-select" required>
+                <option value="" selected disabled>선택</option>
+                <option value="서울">서울</option>
+                <option value="경기">경기</option>
+                <option value="세종">세종</option>
+                <option value="부산">부산</option>
+                <option value="대구">대구</option>
+                <option value="인천">인천</option>
+                <option value="광주">광주</option>
+                <option value="대전">대전</option>
+                <option value="울산">울산</option>
+                <option value="강원도">강원도</option>
+                <option value="충청도">충청도</option>
+                <option value="전라도">전라도</option>
+                <option value="경상도">경상도</option>
+                <option value="제주도">제주도</option>
+            </select>
+        </div>
+
+        <!-- 주소 -->
+        <div class="form-group">
+            <label for="addr">주소</label>
+            <input type="text" name="addr" id="addr" class="form-control" placeholder="주소를 입력하세요" required>
+        </div>
+
+        <!-- 이미지 업로드 -->
+        <div class="form-group">
+            <label for="images">이미지 업로드</label>
+            <input type="file" id="images" name="files" class="form-control" multiple accept="image/*">
+        </div>
+
+        <!-- 내용 -->
+        <div class="form-group">
+            <label for="content">내용</label>
+            <textarea id="content" name="content" class="form-control" placeholder="장소에 대한 설명을 자유롭게 적어주세요" required></textarea>
+        </div>
+
+        <!-- 버튼 -->
+        <div class="btn-actions">
+            <button type="submit" class="reallywant">등록하기</button>
+            <a th:href="@{/place/list}" class="reallywant">목록</a>
+        </div>
+    </form>
+    <style>
+        /* 메인 글쓰기 전용 스타일 */
+        .meditation-write {
+            min-height: calc(77vh);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            padding: 3rem 1rem 2rem;
+            margin-top: 40px;
+        }
+
+        /* 배경 파티클 */
+        .meditation-write::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                    radial-gradient(circle at 20% 80%, rgba(136, 176, 211, 0.15) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(107, 91, 149, 0.1) 0%, transparent 50%),
+                    linear-gradient(135deg, #f8faff 0%, #e6f0ff 100%);
+            animation: breatheBg 12s ease-in-out infinite;
+            z-index: -2;
+        }
+
+        @keyframes breatheBg {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.02); }
+        }
+
+        /* 유리 카드 */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.78);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 28px;
+            padding: 3rem 2.5rem;
+            max-width: 860px;
+            width: 100%;
+            box-shadow:
+                    0 8px 32px rgba(0, 0, 0, 0.08),
+                    0 0 0 1px rgba(255, 255, 255, 0.5);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes floatCard {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(0.5deg); }
+        }
+
+        /* 요소 등장 애니메이션 */
+        .glass-card > * {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease forwards;
+        }
+        .glass-card h3 { animation-delay: 0.1s; }
+        .glass-card .form-group:nth-child(2) { animation-delay: 0.2s; }
+        .glass-card .form-group:nth-child(3) { animation-delay: 0.3s; }
+        .glass-card .form-group:nth-child(4) { animation-delay: 0.4s; }
+        .glass-card .form-group:nth-child(5) { animation-delay: 0.5s; }
+        .glass-card .form-group:nth-child(6) { animation-delay: 0.6s; }
+        .glass-card .form-group:nth-child(7) { animation-delay: 0.7s; }
+        .glass-card .btn-actions { animation-delay: 0.8s; }
+
+        /* 제목 */
+        .glass-card h3 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 2.5rem;
+            background: linear-gradient(135deg, #2D5A87, #6B9B7A);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+        }
+
+        /* 입력 그룹 */
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        .form-group label {
+            color: #64748b;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            display: block;
+            transition: all 0.4s ease;
+        }
+
+        /* 텍스트 입력 */
+        .form-control, .form-select {
+            border: none;
+            border-bottom: 2px solid rgba(45, 90, 135, 0.2);
+            padding: 0.75rem 0;
+            background: transparent;
+            font-size: 1.1rem;
+            transition: all 0.4s ease;
+        }
+        .form-control:focus, .form-select:focus {
+            border-bottom-color: var(--primary);
+            outline: none;
+            background: transparent;
+        }
+
+        .form-control[type="file"] {
+            padding: 0.8rem 0;
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            color: #64748b;
+            cursor: pointer;
+            display: block;
+            width: 100%;
+            position: relative;
+        }
+
+        /* 크롬/사파리/엣지 */
+        .form-control[type="file"]::-webkit-file-upload-button {
+            padding: 0.8rem 2rem;
+            background: white;
+            border: 2px solid var(--primary);
+            border-radius: 25px;
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            outline: none;
+            position: relative;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            min-width: 140px;
+            margin: 0;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(45, 90, 135, 0.1);
+        }
+
+        .form-control[type="file"]::-webkit-file-upload-button:hover,
+        .form-control[type="file"]::file-selector-button:hover,
+        .form-control[type="file"]::-webkit-file-upload-button:active,
+        .form-control[type="file"]::file-selector-button:active {
+            background: var(--gradient-1);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 8px 20px rgba(45, 90, 135, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .form-control[type="file"]::-webkit-file-upload-button {
+            margin-right: 10px; /* 버튼과 파일명 사이 간격 */
+        }
+
+        /* textarea */
+        #content {
+            min-height: 220px !important;
+            resize: none;
+            padding-top: 1rem;
+        }
+
+        /* 반응형 */
+        @media (max-width: 576px) {
+            .glass-card {
+                padding: 2rem 1.5rem;
+                border-radius: 20px;
+            }
+            .glass-card h3 {
+                font-size: 1.8rem;
+            }
+            .btn-actions {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            .breathe-btn, .btn-soft {
+                width: 100%;
+                padding: 0.85rem 1.5rem;
+            }
+            .row > .col {
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</section>
+</html>

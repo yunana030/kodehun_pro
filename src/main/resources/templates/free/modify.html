@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout.html}">
+
+<head>
+    <meta charset="UTF-8">
+    <title>자유게시판 글 수정</title>
+</head>
+
+<section layout:fragment="content" class="meditation-write">
+
+    <!-- 로그인 안된 경우 -->
+    <div th:unless="${#authorization.expression('isAuthenticated()')}"
+         class="text-center py-5">
+        <h3 class="text-muted mb-4">로그인 후 이용 가능합니다.</h3>
+    </div>
+
+    <!-- 로그인 된 경우 -->
+    <form th:if="${#authorization.expression('isAuthenticated()')}"
+          th:action="@{/free/modify}"
+          method="post"
+          enctype="multipart/form-data"
+          class="glass-card">
+
+        <h3>자유게시판 글 수정</h3>
+
+        <!-- 글 번호 (hidden) -->
+        <input type="hidden" name="id" th:value="${free.id}">
+
+        <!-- 제목 -->
+        <div class="form-floating mb-4">
+            <input type="text" class="form-control" id="title"
+                   name="title" placeholder="제목을 입력하세요"
+                   th:value="${free.title}" required>
+            <label for="title">제목</label>
+        </div>
+
+        <!-- 작성자 -->
+        <div class="form-floating mb-4">
+            <input type="text" class="form-control" id="writer"
+                   name="writer" th:value="${free.writer}" readonly>
+            <label for="writer">작성자</label>
+        </div>
+
+        <!-- 내용 -->
+        <div class="form-floating mb-5">
+            <textarea name="content" class="form-control" id="content"
+                      placeholder="내용을 입력하세요" required>[[${free.content}]]</textarea>
+            <label for="content">내용</label>
+        </div>
+
+        <!-- 버튼 -->
+        <div class="writing-actions d-flex gap-3 justify-content-end flex-wrap">
+            <button type="submit" class="admin-btn">수정하기</button>
+            <a th:href="|@{/free/list}?${pageRequestDTO.getLink()}|" class="admin-btn">목록</a>
+        </div>
+    </form>
+
+    <!-- ===== 스타일 ===== -->
+    <style>
+        /* 배경 및 전체 레이아웃 */
+        .meditation-write {
+            min-height: calc(77vh);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            padding: 3rem 1rem 2rem;
+            margin-top: 40px;
+        }
+
+        /* 유리 카드 */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.78);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 28px;
+            padding: 3rem 2.5rem;
+            max-width: 780px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08),
+            0 0 0 1px rgba(255, 255, 255, 0.5);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* 등장 애니메이션 */
+        .glass-card > * {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease forwards;
+        }
+        .glass-card h3 { animation-delay: 0.1s; }
+        .glass-card .form-floating:nth-child(2) { animation-delay: 0.2s; }
+        .glass-card .form-floating:nth-child(3) { animation-delay: 0.3s; }
+        .glass-card .form-floating:nth-child(4) { animation-delay: 0.4s; }
+        .glass-card .writing-actions { animation-delay: 0.6s; }
+
+        @keyframes fadeInUp {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 제목 그라데이션 텍스트 */
+        .glass-card h3 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 2.5rem;
+            background: linear-gradient(135deg, #2D5A87, #6B9B7A);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* 입력 필드 */
+        .form-floating {
+            position: relative;
+        }
+
+        .form-floating > .form-control {
+            border: none;
+            border-bottom: 2px solid rgba(45, 90, 135, 0.2);
+            border-radius: 0;
+            padding: 1rem 15px 0.5rem;
+            background: transparent;
+            font-size: 1.1rem;
+            transition: all 0.4s ease;
+        }
+
+        .form-floating > .form-control:focus {
+            border-bottom-color: var(--primary);
+            box-shadow: 0 0 0 0 transparent;
+            background: transparent;
+        }
+
+        .form-floating > .form-control:focus ~ label,
+        .form-floating > .form-control:not(:placeholder-shown) ~ label {
+            transform: translateY(-1.4rem) scale(0.85);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .form-floating > label {
+            color: #64748b;
+            font-weight: 500;
+            transition: all 0.4s ease;
+            pointer-events: none;
+        }
+
+        /* textarea */
+        #content {
+            min-height: 180px !important;
+            resize: none;
+            padding-top: 1.5rem;
+        }
+        /* 반응형 */
+        @media (max-width: 576px) {
+            .glass-card { padding: 2rem 1.5rem; }
+            .writing-actions { flex-direction: column; gap: 0.75rem; }
+            .reallywant { width: 100%; }
+        }
+    </style>
+</section>
+</html>

@@ -1,0 +1,52 @@
+<div th:fragment="free_table">
+    <table class="table">
+        <thead>
+        <tr>
+            <th>게시글번호</th>
+            <th>제목</th>
+            <th>작성자</th>
+            <th>작성일</th>
+            <th>수정일</th>
+            <th>조회수</th>
+            <th> </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="free : ${freePage.dtoList}">
+            <td th:text="${free.id}"></td>
+            <td th:text="${free.title}"></td>
+            <td th:text="${free.writer}"></td>
+            <td th:text="${#temporals.format(free.regDate, 'yyyy-MM-dd HH:mm')}"></td>
+            <td th:text="${#temporals.format(free.upDate, 'yyyy-MM-dd HH:mm')}"></td>
+            <td th:text="${free.readCount}"></td>
+            <td>
+                <a th:href="@{/free/read(id=${free.id},mode=2)}" target="_blank">
+                    <button class="admin-btn">상세보기</button>
+                </a>
+                <button class="admin-btn"
+                        th:onclick="|deleteFree(${free.id})|">삭제</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- 페이지 버튼 -->
+    <nav>
+        <ul class="pagination">
+            <li class="page-item" th:if="${freePage.prev}">
+                <a class="page-link" href="javascript:void(0)"
+                   th:onclick="|loadFreeList(${freePage.start - 1}, ${freePage.size})|">Previous</a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(freePage.start, freePage.end)}"
+                th:classappend="${i == freePage.page} ? 'active'">
+                <a class="page-link" href="javascript:void(0)"
+                   th:onclick="|loadFreeList(${i}, ${freePage.size})|"
+                   th:text="${i}">1</a>
+            </li>
+            <li class="page-item" th:if="${freePage.next}">
+                <a class="page-link" href="javascript:void(0)"
+                   th:onclick="|loadFreeList(${freePage.end + 1}, ${freePage.size})|">Next</a>
+            </li>
+        </ul>
+    </nav>
+</div>

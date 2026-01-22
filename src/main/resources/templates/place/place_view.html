@@ -1,0 +1,650 @@
+<!--&lt;!&ndash;디자인수정 필요, 페이징처리할 때 하단 버튼 이름과 기능 수정할 것!&ndash;&gt;-->
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout.html}">
+
+<head>
+    <title>Place List</title>
+</head>
+
+<body>
+<section layout:fragment="content" class="meditation-view">
+
+    <div class="container my-5" style="padding-top: 75px" th:if="${#authorization.expression('isAuthenticated()')}">
+
+        <!-- 본문 시작 -->
+        <div class="row g-4">
+            <div class="col-md-7">
+
+            <!-- 왼쪽: 이미지 + 버튼 + 상세내용 -->
+                <div class="free-detail-card">
+                    <div class="place-title-row d-flex justify-content-between align-items-center">
+                        <h2 class="place-name" th:text="${place.placename}">Place Name</h2>
+                        <p class="place-region place-category" th:text="'지역: ' + ${place.sido}">지역: 서울</p>
+                    </div>
+                    <!-- 두 번째 줄: 작성자 + 등록일 (좌측) / 카테고리 (우측) -->
+                    <div class="place-title-row d-flex justify-content-between align-items-center mt-1">
+                        <p class="place-author place-category" th:text="'작성자: ' + ${place.username}">작성자: username</p>
+                        <h6 class="place-category" th:text="'카테고리: ' + ${place.category}">카테고리: TOUR</h6>
+                    </div>
+                    <h3 th:class="free-title"></h3>
+                    <!-- 이미지 -->
+                    <div class="left-image w-100 mb-4">
+                        <div th:if="${place.images != null && !place.images.isEmpty()}" class="yuna-view-image-container">
+                            <img th:each="imgDTO, iterStat : ${place.images}"
+                                 th:src="@{'/uploads/' + ${imgDTO.uuid} + '_' + ${imgDTO.fileName}}"
+                                 th:classappend="${iterStat.index == 0} ? 'active' : 'd-none'"
+                                 class="yuna-view-image"
+                                 alt="Place Image">
+                            <button class="yuna-view-prev">&lt;</button>
+                            <button class="yuna-view-next">&gt;</button>
+                        </div>
+                    </div>
+
+                    <!-- 좋아요 & 즐겨찾기 버튼 -->
+                    <div class="mb-3 like-fav-container">
+                        <button id="likeBtn" class="btn btn-sm d-flex align-items-center gap-1">
+                            <i class="far fa-heart text-muted"></i>
+                            <span id="likeCount" th:text="${place.like_count}">0</span>
+                        </button>
+                        <button id="favoriteBtn" class="btn btn-sm d-flex align-items-center gap-1">
+                            <i class="far fa-bookmark text-muted"></i>
+                            <span id="favoriteCount"></span>
+                        </button>
+                    </div>
+
+                    <!-- 상세 내용 -->
+                    <div class="content-area card shadow-sm mb-4 p-3">
+                        <div class="section-heading">
+                            <!-- 상세내용용 장소명 (타이틀보다 작게) -->
+    <!--                        <h4 class="place-name-detail" th:text="${place.placename}">Place Name</h4>-->
+                            <p class="place-name-detail" th:text="${place.placename}">Place Name</p>
+
+                            <!-- 내용 -->
+                            <p class="place-content" th:text="${place.content}">Place Content</p>
+
+                            <!-- 주소 + 조회수 한 줄 -->
+                            <div class="place-info d-flex justify-content-between">
+                                <span class="place-addr" th:text="${place.addr}">Address</span>
+                                <span class="place-readcount">조회수: <span th:text="${place.readCount}">0</span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 목록/수정/삭제 버튼 (좌측 하단) -->
+                    <div class="text-start mt-8 action-buttons" th:with="link=${requestDTO.getLink()}">
+                        <span th:if="${#authentication?.principal?.username == place.username || #authentication?.principal?.member?.role == 'ADMIN'}">
+                            <a th:href="@{/place/modify/{id}(id=${place.id}, ${link})}" class="yuna-search-btn">수정</a>
+                            <a th:href="@{/place/delete/{id}(id=${place.id})}" class="yuna-search-btn">삭제</a>
+                        </span>
+                        <a th:href="@{/place/list(
+                                  page=${requestDTO.page},
+                                  size=${requestDTO.size},
+                                  category=${requestDTO.category},
+                                  keyword=${requestDTO.keyword},
+                                  type=${requestDTO.type}
+                                )}" class="yuna-search-btn">목록</a>
+                    </div>
+
+
+                </div>
+            </div>
+
+            <!-- 오른쪽: 댓글 영역 -->
+            <div class="col-md-5">
+                <div class="reply-card">
+                    <h5 class="border-bottom pb-2 mb-4 fw-semibold">💬 댓글</h5>
+
+                    <input type="hidden" id="loginUsername" th:value="${#authentication?.principal?.username}" />
+                    <input type="hidden" id="loginRole" th:value="${#authentication?.principal?.member?.role}" />
+
+                    <!-- 댓글 목록 -->
+                    <ul id="replyList" class="list-group mb-4"></ul>
+
+                    <!-- 페이징 -->
+                    <div class="d-flex justify-content-center mb-4">
+                        <nav>
+                            <ul class="pagination" id="replyPagination"></ul>
+                        </nav>
+                    </div>
+
+                    <!-- 댓글 작성 -->
+                    <div class="card shadow-sm mb-4 mt-8">
+                        <div class="reply-card">
+                            <div th:if="${#authentication?.principal != null}">
+                                <form id="replyForm">
+                                    <div class="mb-3">
+                                        <label for="replyWriter" class="form-label fw-semibold">작성자</label>
+                                        <input type="text" id="replyWriter" class="form-control"
+                                               th:value="${#authentication.principal.username}" readonly>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="replyContent" class="form-label fw-semibold">댓글 작성</label>
+                                        <textarea id="replyContent" class="form-control" rows="3"
+                                                  placeholder="댓글을 입력하세요..."></textarea>
+                                    </div>
+                                    <div class="d-flex justify-content-end">
+                                        <button type="button" id="replyRegisterBtn" class="admin-btn">등록</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 비로그인 사용자 -->
+    <div th:unless="${#authorization.expression('isAuthenticated()')}" class="text-center" style="padding-top: 10rem;">
+        <h3 class="text-muted">로그인 후 이용 가능합니다.</h3>
+    </div>
+
+    <style>
+        .meditation-view {
+            min-height: calc(77vh);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            padding: 3rem 1rem 2rem;
+            margin-top: 40px;
+        }
+
+        /* 댓글 작성 영역 전체 높이 줄이기 */
+        .yuna_design_reply {
+            height: 50%;
+            min-height: 150px;
+            max-height: 300px;
+            overflow: hidden;  /* 내용 넘치면 숨기기 */
+            padding: 0;
+            margin: 0;
+        }
+        /* 카드 내부 body 패딩 조절 */
+        .yuna_design_reply .card-body {
+            padding: 0;        /* 카드 안쪽 여백 줄이기 */
+        }
+        /* form 요소 간격 줄이기 */
+        .yuna_design_reply #replyForm .mb-3 {
+            margin-bottom: 0.5rem;  /* 레이블과 입력칸 간 간격 줄임 */
+        }
+
+        .button-box {
+            display: flex;
+            gap: 10px; /* 버튼 사이 간격 */
+        }
+        .place-category {
+            font-size: 14px;
+            color: #777;
+            margin: 0;
+        }
+
+        .content-area {
+            background-color: #fff;
+            border-radius: 12px;             /* 모서리 둥글게 */
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); /* 살짝 그림자 */
+            margin-bottom: 20px;
+            width: 750px;/* 아래 여백 */
+            max-width: 100%
+        }
+
+        .section-heading h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .section-heading h6 {
+            font-size: 14px;
+            color: #777;
+            margin-bottom: 8px;
+        }
+
+        .section-heading p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        /* 좋아요 & 즐겨찾기 버튼 컨테이너 */
+        .like-fav-container {
+            display: flex;
+            align-items: center;    /* 세로 중앙 정렬 */
+            gap: 20px;              /* 버튼 사이 간격 */
+        }
+
+        /* 버튼 공통 스타일 */
+        .like-fav-container button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.2rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .like-fav-container i {
+            font-size: 2rem;
+            color: #555;
+            transition: color 0.2s ease;
+        }
+
+        /* hover 시 색상 강조 */
+        .like-fav-container button:hover i {
+            color: #ff4d6d;
+        }
+        .like-fav-container span {
+            font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #333;
+            margin-left: 4px;       /* 아이콘과 살짝 띄우기 */
+        }
+    /*1113, yuna추가 css*/
+        .place-name {
+            font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+            font-weight: 700;
+            font-size: 28px;
+            line-height: 1.3;
+            margin: 0;
+        }
+        .place-category, .place-author, .place-region {
+            font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+            font-weight: 500;
+            font-size: 14px;
+            line-height: 1.4;
+            margin: 0;
+        }
+        .place-title-row + .place-title-row {
+            margin-top: 6px;
+        }
+        .place-content {
+
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.5;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .place-addr, .place-readcount {
+            font-size: 14px;
+            color: #777;
+            margin-top: 0.5rem;
+        }
+
+        .section-heading p {
+            font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .place-name-detail {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+            font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+        }
+        .place-addr, .place-readcount {
+            font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            color: #777;
+            margin: 0;
+        }
+
+        .content-area .place-name-detail {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+            display: inline-block;
+            padding-bottom: 0.25em;
+            border-bottom: 0.3em solid rgba(45, 90, 135, 0.25);
+        }
+
+        /* 전체 섹션 */
+        .content-container {
+            padding-top: 6rem;
+            padding-bottom: 6rem;
+        }
+
+        /* 메인 카드 */
+        .free-detail-card {
+            background: #fff;
+            border-radius: 1.2rem;
+            padding: 2.5rem;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column; /* 위에서 아래로 쌓이도록 */
+            flex: 1;
+        }
+
+        .free-detail-card label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .text-start.mt-8 {
+            margin-top: auto;
+        }
+
+        .row.g-4 {
+            display: flex;
+            align-items: stretch;
+        }
+
+        .col-md-7, .col-md-5 {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .free-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #2e3a59;
+            border-bottom: 2px solid #4e73df;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* 댓글 카드 */
+        .reply-card {
+            background: #fdfdfd;
+            border-radius: 1.2rem;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        #replyList {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+        }
+
+        #replyForm {
+            margin-top: auto !important;       /* 맨 아래 고정 */
+        }
+
+        /* 댓글 항목 */
+        .list-group-item {
+            border: none;
+            margin-bottom: 0.6rem;
+            border-radius: 0.6rem;
+            background: #f8f9fa;
+            transition: 0.2s;
+        }
+
+        .list-group-item:hover {
+            background: #eef2ff;
+        }
+
+        .list-group-item strong {
+            color: #2e3a59;
+        }
+
+        .list-group-item small {
+            color: #868e96;
+        }
+        /* 댓글 버튼 */
+        .edit-btn, .delete-btn {
+            border-radius: 0.4rem;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+
+        .edit-btn {
+            border: 1px solid #4e73df;
+            color: #4e73df;
+        }
+
+        .edit-btn:hover {
+            background: #4e73df;
+            color: #fff;
+        }
+
+        .delete-btn {
+            border: 1px solid #e74a3b;
+            color: #e74a3b;
+        }
+
+        .delete-btn:hover {
+            background: #e74a3b;
+            color: #fff;
+        }
+
+        /* 댓글 입력 */
+        #replyForm textarea {
+            resize: none;
+        }
+
+    </style>
+
+
+    <!-- JS -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        window.placeId = [[${place.id}]];
+        /*]]>*/
+    </script>
+    <script src="/js/place.js"></script>
+    <script src="/js/reply.js"></script>
+</section>
+<script layout:fragment="script" th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", async () => {
+        const replyList = document.querySelector("#replyList")
+        const replyContent = document.querySelector("#replyContent")
+        const replyRegisterBtn = document.querySelector("#replyRegisterBtn")
+        const replyWriter = document.querySelector("#replyWriter")
+        // const placeId = [[${place.id}]]  // 게시글 ID
+        const placeId = window.placeId;
+        const loggedInUser = document.querySelector("#loginUsername").value
+        const userRole = document.querySelector("#loginRole").value
+        const isAdmin = userRole === 'ADMIN'
+
+        const likeBtn = document.querySelector("#likeBtn")
+        const likeCountEl = document.querySelector("#likeCount")
+        const likeIcon = likeBtn.querySelector('i')
+
+        const favoriteBtn = document.querySelector("#favoriteBtn")
+        const favoriteCountEl = document.querySelector("#favoriteCount")
+        const favoriteIcon = favoriteBtn.querySelector('i')
+
+        // 즐겨찾기 추가
+
+        // 즐겨찾기 상태 로드
+        async function loadFavoriteStatus() {
+            try {
+                const response = await axios.get(`/place/${placeId}/favorite/status`)
+                const { favorited, loginRequired } = response.data
+
+                if (loginRequired) {
+                    favoriteBtn.classList.remove("btn-warning")
+                    favoriteBtn.classList.add("btn-outline-warning")
+                    favoriteIcon.classList.replace("fas", "far")
+                    favoriteCountEl.textContent = ""
+                    return
+                }
+
+                // 즐겨찾기 상태 업데이트
+                if (favorited) {
+                    favoriteIcon.classList.replace("far", "fas")
+                    favoriteIcon.classList.replace("text-muted", "text-warning")  // 노랑
+                } else {
+                    favoriteIcon.classList.replace("fas", "far")
+                    favoriteIcon.classList.replace("text-warning", "text-muted")
+                }
+            } catch (error) {
+                console.error("즐겨찾기 상태 로드 실패", error)
+            }
+        }
+
+        // 즐겨찾기 클릭
+        favoriteBtn.addEventListener("click", async () => {
+            try {
+                await axios.post(`/place/${placeId}/favorite`)
+                await loadFavoriteStatus()
+            } catch (error) {
+                alert("즐겨찾기 처리 중 오류가 발생했습니다.")
+                console.error(error)
+            }
+        })
+
+
+        // 좋아요
+        // 좋아요 상태 로드
+        async function loadLikeStatus() {
+            try {
+                const response = await axios.get(`/place/${placeId}/like/status`)
+                const { liked, count } = response.data
+
+                likeCountEl.textContent = count
+
+                // 좋아요 상태 업데이트
+                if (liked) {
+                    likeIcon.classList.replace("far", "fas")
+                    likeIcon.classList.replace("text-muted", "text-danger")  // 빨강
+                } else {
+                    likeIcon.classList.replace("fas", "far")
+                    likeIcon.classList.replace("text-danger", "text-muted")
+                }
+            } catch (error) {
+                console.error("좋아요 상태 로드 실패", error)
+            }
+        }
+
+        // 좋아요 클릭
+        likeBtn.addEventListener("click", async () => {
+            try {
+                const response = await axios.post(`/place/${placeId}/like`)
+                const count = parseInt(response.data)
+                if (count === -1) {
+                    alert("로그인 후 이용 가능합니다.")
+                    return
+                }
+                await loadLikeStatus()
+            } catch (error) {
+                if (error.response?.status === 401) {
+                    alert("로그인 후 이용 가능합니다.")
+                } else {
+                    alert("좋아요 처리 중 오류가 발생했습니다.")
+                }
+            }
+        })
+        // // 초기 로드
+        // await loadLikeStatus();
+
+        // 댓글 목록 + 페이지네이션
+        async function loadReplies(page = 1) {
+            const response = await axios.get(`/replies/list/place/${placeId}`, { params: { page, size: 5 } })
+            const data = response.data
+
+            replyList.innerHTML = ""
+            const paginationEl = document.querySelector("#replyPagination")
+            paginationEl.innerHTML = ""
+
+            if (!data || data.dtoList.length === 0) {
+                replyList.innerHTML = `<li class="list-group-item text-center text-muted">등록된 댓글이 없습니다.</li>`
+                return
+            }
+
+            // 댓글 렌더링
+            data.dtoList.forEach(reply => {
+                const li = document.createElement("li")
+                li.className = "list-group-item px-3 py-2"
+                const showButtons = loggedInUser === reply.username || isAdmin
+
+                li.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <strong>${reply.username}</strong>
+                            <p class="mb-1">${reply.content}</p>
+                            <small>${reply.regDate ? reply.regDate.replace('T', ' ') : ''}</small>
+                        </div>
+                        <div>
+                            ${showButtons ? `
+                                <button class="btn btn-sm edit-btn" data-rno="${reply.rno}">수정</button>
+                                <button class="btn btn-sm delete-btn" data-rno="${reply.rno}">삭제</button>
+                            ` : ''}
+                        </div>
+                    </div>`
+                replyList.appendChild(li)
+            })
+
+            // 페이지 버튼 생성
+            const totalPages = Math.ceil(data.total / 5)
+            for (let i = 1; i <= totalPages; i++) {
+                const li = document.createElement("li")
+                li.className = `page-item ${i === page ? 'active' : ''}`
+                li.innerHTML = `<a class="page-link" href="#">${i}</a>`
+                li.addEventListener("click", (e) => {
+                    e.preventDefault()
+                    loadReplies(i)
+                })
+                paginationEl.appendChild(li)
+            }
+        }
+
+        // 댓글 등록
+        replyRegisterBtn.addEventListener("click", async () => {
+            const content = replyContent.value.trim()
+            const username = replyWriter.value.trim()
+
+            if (!content) {
+                alert("댓글 내용을 입력하세요.")
+                return
+            }
+
+            const replyObj = { content, username, placeId, type: "PLACE" }
+
+            await axios.post("/replies", replyObj)
+            replyContent.value = ""
+            await loadReplies()
+        })
+
+        // 댓글 수정 / 삭제
+        replyList.addEventListener("click", async (e) => {
+            const target = e.target
+            const rno = target.dataset.rno
+            if (target.classList.contains("delete-btn")) {
+                if (confirm("삭제하시겠습니까?")) {
+                    await axios.delete(`/replies/${rno}`)
+                    await loadReplies()
+                }
+            } else if (target.classList.contains("edit-btn")) {
+                const newContent = prompt("수정할 내용을 입력하세요:")
+                if (newContent && newContent.trim() !== "") {
+                    await axios.put(`/replies/${rno}`, {
+                        rno,
+                        content: newContent,
+                        username: replyWriter.value,
+                        placeId,
+                        type: "PLACE"
+                    })
+                    await loadReplies()
+                }
+            }
+        })
+
+        // // 초기 로딩
+        // await loadReplies()
+        // 초기 로딩
+        await loadLikeStatus()
+        await loadFavoriteStatus()
+        await loadReplies()
+    })
+</script>
+</body>
+</html>
+

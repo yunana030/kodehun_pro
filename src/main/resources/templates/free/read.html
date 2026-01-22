@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout/layout.html}">
+<head>
+    <meta charset="UTF-8">
+    <title>자유게시판 상세보기</title>
+</head>
+
+<section layout:fragment="content" class="meditation-read">
+    <div class="container content-container" th:if="${#authorization.expression('isAuthenticated()')}">
+        <div class="row g-4">
+
+            <!-- 왼쪽: 게시글 상세 -->
+            <div class="col-md-7">
+                <div class="free-detail-card">
+                    <h3 class="free-title">자유게시판 글 상세보기</h3>
+                    <input type="hidden" name="id" th:value="${free.id}">
+
+                    <div class="mb-3">
+                        <label>제목</label>
+                        <input type="text" class="form-control" th:value="${free.title}" readonly>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>내용</label>
+                        <div class="notice-content form-control" th:text="${free.content}"></div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label>작성자</label>
+                            <input type="text" class="form-control" th:value="${free.writer}" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label>조회수</label>
+                            <input type="text" class="form-control" th:value="${free.readCount}" readonly>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label>등록일</label>
+                            <input type="text" class="form-control" th:value="${#temporals.format(free.regDate, 'yyyy-MM-dd HH:mm')}" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label>수정일</label>
+                            <input type="text" class="form-control" th:value="${#temporals.format(free.upDate, 'yyyy-MM-dd HH:mm')}" readonly>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 action-buttons" th:with="link=${pageRequestDTO.getLink()}">
+                        <span th:if="${#authentication?.principal?.username == free.writer || #authentication?.principal?.member?.role == 'ADMIN'}">
+                            <a th:href="|@{/free/modify(id=${free.id},mode=2)}&${link}|" class="admin-btn">수정</a>
+                            <a th:href="@{/free/remove(id=${free.id})}" class="admin-btn">삭제</a>
+                        </span>
+                        <a th:href="|@{/free/list}?${link}|" class="admin-btn">목록</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 오른쪽: 댓글 섹션 -->
+            <div class="col-md-5">
+                <div class="reply-card">
+                    <h5 class="border-bottom pb-2 mb-4 fw-semibold">💬 댓글</h5>
+
+                    <input type="hidden" id="loginUsername" th:value="${#authentication?.principal?.username}" />
+                    <input type="hidden" id="loginRole" th:value="${#authentication?.principal?.member?.role}" />
+
+                    <ul id="replyList" class="list-group mb-4"></ul>
+
+                    <div class="d-flex justify-content-center mb-4">
+                        <nav>
+                            <ul class="pagination" id="replyPagination"></ul>
+                        </nav>
+                    </div>
+
+<!--                    댓글 작성 -->
+                    <div class="card shadow-sm mb-4 mt-3">
+                        <div class="reply-card">
+                            <div th:if="${#authentication?.principal != null}">
+                                <form id="replyForm">
+                                    <div class="mb-3">
+                                        <label for="replyWriter" class="form-label fw-semibold">작성자</label>
+                                        <input type="text" id="replyWriter" class="form-control"
+                                               th:value="${#authentication.principal.username}" readonly>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="replyContent" class="form-label fw-semibold">댓글 작성</label>
+                                        <textarea id="replyContent" class="form-control" rows="3"
+                                                  placeholder="댓글을 입력하세요..."></textarea>
+                                    </div>
+                                    <div class="d-flex justify-content-end">
+                                        <button type="button" id="replyRegisterBtn" class="admin-btn">등록</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 비로그인 안내 -->
+    <div th:unless="${#authorization.expression('isAuthenticated()')}" class="text-center">
+        <h3 class="text-muted">로그인 후 이용 가능합니다.</h3>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/js/reply.js"></script>
+    <style>
+
+        .meditation-read {
+            min-height: calc(77vh);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            padding: 3rem 1rem 2rem;
+            margin-top: 40px;
+            overflow: visible;
+
+        }
+
+        /* 메인 카드 */
+        .free-detail-card {
+            background: #fff;
+            border-radius: 1.2rem;
+            padding: 2.5rem;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column; /* 위에서 아래로 쌓이도록 */
+            flex: 1;
+        }
+
+        .free-detail-card label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .mt-8 {
+            margin-top: auto; /* 남는 공간 아래로 밀기 */
+        }
+
+        .row.g-4 {
+            display: flex;
+            align-items: stretch; /* 자식 컬럼 높이 동일하게 */
+            /*min-height: 80vh;     !* 화면 높이 기준 예시 *!*/
+        }
+
+        .col-md-7, .col-md-5 {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .free-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #2e3a59;
+            border-bottom: 2px solid #4e73df;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        /* 댓글 카드 */
+        .reply-card {
+            background: #fdfdfd;
+            border-radius: 1.2rem;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        #replyList {
+            flex: 1;                /* 남는 공간 채움 */
+            overflow-y: auto;       /* 댓글 많으면 스크롤 */
+            margin-bottom: 1rem;    /* 입력창과 간격 */
+        }
+
+        #replyForm {
+            margin-top: auto !important;       /* 맨 아래 고정 */
+        }
+
+        /* 댓글 항목 */
+        .list-group-item {
+            border: none;
+            margin-bottom: 0.6rem;
+            border-radius: 0.6rem;
+            background: #f8f9fa;
+            transition: 0.2s;
+        }
+
+        .list-group-item:hover {
+            background: #eef2ff;
+        }
+
+        .list-group-item strong {
+            color: #2e3a59;
+        }
+
+        .list-group-item small {
+            color: #868e96;
+        }
+        /* 댓글 버튼 */
+        .edit-btn, .delete-btn {
+            border-radius: 0.4rem;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+
+        .edit-btn {
+            border: 1px solid #4e73df;
+            color: #4e73df;
+        }
+
+        .edit-btn:hover {
+            background: #4e73df;
+            color: #fff;
+        }
+
+        .delete-btn {
+            border: 1px solid #e74a3b;
+            color: #e74a3b;
+        }
+
+        .delete-btn:hover {
+            background: #e74a3b;
+            color: #fff;
+        }
+
+        /* 댓글 입력 */
+        #replyForm textarea {
+            margin-top: auto !important;       /* 맨 아래 고정 */
+            resize: none;
+        }
+    </style>
+</section>
+
+<script layout:fragment="script" th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", async () => {
+        const replyList = document.querySelector("#replyList")
+        const replyContent = document.querySelector("#replyContent")
+        const replyRegisterBtn = document.querySelector("#replyRegisterBtn")
+        const replyWriter = document.querySelector("#replyWriter")
+        const freeId = [[${free.id}]]
+        const loggedInUser = document.querySelector("#loginUsername").value
+        const userRole = document.querySelector("#loginRole").value
+        const isAdmin = userRole === 'ADMIN'
+
+        // 댓글 목록 + 페이지네이션
+        async function loadReplies(page = 1) {
+            const response = await axios.get(`/replies/list/free/${freeId}`, { params: { page, size: 5 } })
+            const data = response.data
+            replyList.innerHTML = ""
+            const paginationEl = document.querySelector("#replyPagination")
+            paginationEl.innerHTML = ""
+
+            if (!data || data.dtoList.length === 0) {
+                replyList.innerHTML = `<li class="list-group-item text-center text-muted py-3">등록된 댓글이 없습니다.</li>`
+                return
+            }
+
+            // 댓글 렌더링
+            data.dtoList.forEach(reply => {
+                const li = document.createElement("li")
+                li.className = "list-group-item px-3 py-2"
+                const showButtons = loggedInUser === reply.username || isAdmin
+
+                li.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <strong>${reply.username}</strong>
+                            <p class="mb-1 mt-1">${reply.content}</p>
+                            <small>${reply.regDate ? reply.regDate.replace('T', ' ') : ''}</small>
+                        </div>
+                        <div>
+                            ${showButtons ? `
+                                <button class="btn btn-sm edit-btn" data-rno="${reply.rno}">수정</button>
+                                <button class="btn btn-sm delete-btn" data-rno="${reply.rno}">삭제</button>
+                            ` : ''}
+                        </div>
+                    </div>`
+                replyList.appendChild(li)
+            })
+
+            // 페이지 버튼 생성
+            const totalPages = Math.ceil(data.total / 5)
+            for (let i = 1; i <= totalPages; i++) {
+                const li = document.createElement("li")
+                li.className = `page-item ${i === page ? 'active' : ''}`
+                li.innerHTML = `<a class="page-link" href="#">${i}</a>`
+                li.addEventListener("click", e => {
+                    e.preventDefault()
+                    loadReplies(i)
+                })
+                paginationEl.appendChild(li)
+            }
+        }
+
+        // 댓글 등록
+        replyRegisterBtn?.addEventListener("click", async () => {
+            const content = replyContent.value.trim()
+            const username = replyWriter.value.trim()
+
+            if (!content) return alert("댓글 내용을 입력하세요.")
+
+            await axios.post("/replies", { content, username, freeId, type: "FREE" })
+            replyContent.value = ""
+            await loadReplies()
+        })
+
+        // 댓글 수정 / 삭제
+        replyList.addEventListener("click", async e => {
+            const target = e.target
+            const rno = target.dataset.rno
+            if (target.classList.contains("delete-btn")) {
+                if (confirm("댓글을 삭제하시겠습니까?")) {
+                    await axios.delete(`/replies/${rno}`)
+                    await loadReplies()
+                }
+            } else if (target.classList.contains("edit-btn")) {
+                const newContent = prompt("수정할 내용을 입력하세요:")
+                if (newContent && newContent.trim()) {
+                    await axios.put(`/replies/${rno}`, { rno, content: newContent, username: replyWriter.value, freeId, type: "FREE" })
+                    await loadReplies()
+                }
+            }
+        })
+
+        await loadReplies()
+    })
+</script>
+</html>

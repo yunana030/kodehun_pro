@@ -1,0 +1,58 @@
+<div th:fragment="notice_table">
+    <!-- 공지사항 등록 버튼 -->
+    <button class="admin-btn" data-bs-toggle="modal" data-bs-target="#noticeModal">
+        공지사항 등록
+    </button>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>번호</th>
+            <th>제목</th>
+            <th>작성일</th>
+            <th>수정일</th>
+            <th>작성자</th>
+            <th> </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="notice : ${noticePage.dtoList}">
+            <td th:text="${notice.id}"></td>
+            <td th:text="${notice.title}"></td>
+            <td th:text="${#temporals.format(notice.regDate, 'yyyy-MM-dd HH:mm')}"></td>
+            <td th:text="${#temporals.format(notice.upDate, 'yyyy-MM-dd HH:mm')}"></td>
+            <td th:text="${notice.writer}"></td>
+            <td>
+                <a th:href="@{/free/notice/read(id=${notice.id},mode=2)}" target="_blank">
+                    <button class="admin-btn">상세보기</button>
+                </a>
+                <button class="admin-btn"
+                        th:onclick="|loadNoticeDetail(${notice.id})|">수정</button>
+                <button class="admin-btn"
+                        th:onclick="|deleteNotice(${notice.id})|">삭제</button>
+            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(noticePage)}">
+            <td colspan="4">등록된 공지사항이 없습니다.</td>
+        </tr>
+        </tbody>
+    </table>
+    <!-- 페이지 버튼 -->
+    <nav>
+        <ul class="pagination">
+            <li class="page-item" th:if="${noticePage.prev}">
+                <a class="page-link" href="javascript:void(0)"
+                   th:onclick="|loadNoticeList(${noticePage.start - 1}, ${noticePage.size})|">Previous</a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(noticePage.start, noticePage.end)}"
+                th:classappend="${i == noticePage.page} ? 'active'">
+                <a class="page-link" href="javascript:void(0)"
+                   th:onclick="|loadNoticeList(${i}, ${noticePage.size})|"
+                   th:text="${i}">1</a>
+            </li>
+            <li class="page-item" th:if="${noticePage.next}">
+                <a class="page-link" href="javascript:void(0)"
+                   th:onclick="|loadNoticeList(${noticePage.end + 1}, ${noticePage.size})|">Next</a>
+            </li>
+        </ul>
+    </nav>
+</div>

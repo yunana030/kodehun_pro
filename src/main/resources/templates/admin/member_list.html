@@ -1,0 +1,50 @@
+<div th:fragment="member_table">
+    <table class="table">
+        <thead>
+        <tr>
+            <th>번호</th>
+            <th>아이디</th>
+            <th>이름</th>
+            <th>이메일</th>
+            <th>전화번호</th>
+            <th>권한</th>
+            <th> </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="member : ${memberPage.dtoList}">
+            <td th:text="${member.id}"></td>
+            <td th:text="${member.username}"></td>
+            <td th:text="${member.name}"></td>
+            <td th:text="${member.email}"></td>
+            <td th:text="${member.mphone}"></td>
+            <td th:text="${member.role}"></td>
+            <td>
+                <button class="admin-btn"
+                        th:onclick="|loadUserDetail(${member.id})|">수정</button>
+                <button class="admin-btn"
+                        th:onclick="|deleteUser(${member.id})|">삭제</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <!-- 페이지 버튼 -->
+    <nav>
+        <ul class="pagination">
+            <li class="page-item" th:if="${memberPage.prev}">
+                <a class="page-link" href="javascript:void(0)"
+                   th:onclick="|loadMemberList(${memberPage.start - 1}, ${memberPage.size})|">Previous</a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(memberPage.start, memberPage.end)}"
+                th:classappend="${i == memberPage.page} ? 'active'">
+                <a class="page-link" href="javascript:void(0)"
+                   th:onclick="|loadMemberList(${i}, ${memberPage.size})|"
+                   th:text="${i}">1</a>
+            </li>
+            <li class="page-item" th:if="${memberPage.next}">
+                <a class="page-link" href="javascript:void(0)"
+                   th:onclick="|loadMemberList(${memberPage.end + 1}, ${memberPage.size})|">Next</a>
+            </li>
+        </ul>
+    </nav>
+</div>

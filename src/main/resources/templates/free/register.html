@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout.html}">
+
+<head>
+    <meta charset="UTF-8">
+    <title>자유게시판 글 작성</title>
+</head>
+
+<section layout:fragment="content" class="meditation-write">
+
+    <!-- 로그인 안된 경우 -->
+    <div th:unless="${#authorization.expression('isAuthenticated()')}"
+         class="text-center py-5">
+        <h3 class="text-muted mb-4">로그인 후 이용 가능합니다.</h3>
+    </div>
+
+    <!-- 로그인 된 경우 -->
+    <form th:if="${#authorization.expression('isAuthenticated()')}"
+          th:action="@{/free/register}"
+          method="post"
+          class="glass-card">
+
+        <h3>자유게시판 글 작성</h3>
+
+        <!-- 제목 -->
+        <div class="form-floating mb-4">
+            <input type="text" name="title" class="form-control" id="title"
+                   placeholder="제목을 입력하세요" required>
+            <label for="title">제목</label>
+        </div>
+
+        <!-- 작성자 -->
+        <div class="form-floating mb-4">
+            <input type="text" class="form-control" id="writer"
+                   th:value="${#authentication.principal.username}" readonly>
+            <label for="writer">작성자</label>
+        </div>
+
+        <!-- 내용 -->
+        <div class="form-floating mb-5">
+            <textarea name="content" class="form-control" id="content"
+                      placeholder="내용을 입력하세요" required></textarea>
+            <label for="content">내용</label>
+        </div>
+
+        <!-- 버튼 -->
+        <div class="writing-actions d-flex gap-3 justify-content-end flex-wrap">
+            <button type="submit" class="admin-btn">등록하기</button>
+            <button type="reset" class="admin-btn">초기화</button>
+            <a th:href="@{/free/list}" class="admin-btn">목록</a>
+        </div>
+    </form>
+    <style>
+        /* 자유게시판 글쓰기 전용 스타일 */
+        .meditation-write {
+            min-height: calc(77vh);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            padding: 4rem 1rem;
+            margin-top: 30px;
+        }
+
+        /* 유리 카드 */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.78);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 28px;
+            padding: 3rem 2.5rem;
+            max-width: 780px;
+            width: 100%;
+            box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.08),
+                0 0 0 1px rgba(255, 255, 255, 0.5);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes floatCard {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(0.5deg); }
+        }
+
+        /* 카드 내부 애니메이션 */
+        .glass-card > * {
+            opacity: 0;
+            transform: translateY(20px);
+        animation: fadeInUp 0.8s ease forwards;
+        }
+        .glass-card h3 { animation-delay: 0.1s; }
+        .glass-card .form-floating:nth-child(2) { animation-delay: 0.2s; }
+        .glass-card .form-floating:nth-child(3) { animation-delay: 0.3s; }
+        .glass-card .form-floating:nth-child(4) { animation-delay: 0.4s; }
+        .glass-card .writing-actions { animation-delay: 0.6s; }
+
+        /* 제목 그라데이션 텍스트 */
+        .glass-card h3 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 2.5rem;
+            background: linear-gradient(135deg, #2D5A87, #6B9B7A);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+        }
+        /* 입력 필드 – 빛나는 포커스 */
+        .form-floating {
+            position: relative;
+        }
+        .form-floating > .form-control {
+            border: none;
+            border-bottom: 2px solid rgba(45, 90, 135, 0.2);
+            border-radius: 0;
+            padding: 1rem 15px 0.5rem;
+            background: transparent;
+            font-size: 1.1rem;
+            transition: all 0.4s ease;
+        }
+        .form-floating > .form-control:focus {
+            border-bottom-color: var(--primary);
+            box-shadow: 0 0 0 0 transparent;
+            background: transparent;
+        }
+        .form-floating > .form-control:focus ~ label,
+        .form-floating > .form-control:not(:placeholder-shown) ~ label {
+            transform: translateY(-1.4rem) scale(0.85);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .form-floating > label {
+            color: #64748b;
+            font-weight: 500;
+            transition: all 0.4s ease;
+            pointer-events: none;
+        }
+
+        /* textarea */
+        #content {
+            min-height: 180px !important;
+            resize: none;
+            padding-top: 1.5rem;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 12px 28px rgba(45, 90, 135, 0.35); }
+            50% { box-shadow: 0 12px 28px rgba(45, 90, 135, 0.5), 0 0 20px rgba(107, 91, 149, 0.4); }
+        }
+
+        /* 반응형 */
+        @media (max-width: 576px) {
+        .glass-card { padding: 2rem 1.5rem; }
+        .writing-actions { flex-direction: column; gap: 0.75rem; }
+        .breathe-btn, .btn-soft { width: 100%; }
+        }
+    </style>
+</section>
+</html>

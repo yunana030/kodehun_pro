@@ -1,0 +1,103 @@
+<div layout:fragment="mypage_content"
+     xmlns:th="http://www.thymeleaf.org"
+     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+     layout:decorate="~{layout/mypage_layout.html}" xmlns="http://www.w3.org/1999/html">
+
+    <section class="mypage-section">
+        <div class="free-detail-card"> <!-- 카드 스타일 적용 -->
+            <h4>내가 찜한 장소</h4>
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">게시글 번호</th>
+                        <th scope="col">장소명</th>
+                        <th scope="col">카테고리</th>
+                        <th scope="col">지역</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="place, stat : ${favoritePlaces}">
+                        <th scope="row" th:text="${place.id}"></th>
+                        <td>
+                            <a th:href="@{'/place/view/' + ${place.id}}" th:text="${place.placename}" target="_blank"></a>
+                        </td>
+                        <td th:text="${place.category}"></td>
+                        <td th:text="${place.sido}"></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(favoritePlaces)}">
+                        <td colspan="4" class="text-center text-muted py-3">즐겨찾기한 장소가 없습니다.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+        <style>
+            /* 자유게시판 페이지에서 쓰던 카드 스타일 재사용 */
+            .free-detail-card {
+                background: #fff;
+                border-radius: 1.2rem;
+                padding: 2.5rem;
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+                transition: 0.3s;
+                margin: 150px auto;  /* 중앙 정렬 */
+                max-width: 1200px;
+                max-height: 500px;
+                overflow: hidden;
+            }
+            /* 테이블 스타일 재사용 */
+            .table {
+                border-radius: 0.8rem;
+                width: 100%;
+                margin-top: 1rem;
+                border-collapse: collapse;
+                font-size: 0.95rem;
+                max-height: 400px;
+                overflow-y: auto;
+            }
+
+            .table thead {
+                background-color: #f8f9fa;
+            }
+
+            .table th, .table td {
+                padding: 12px 16px;
+                border-bottom: 1px solid #e9ecef;
+                text-align: left;
+            }
+
+            .table tbody tr:hover {
+                background-color: #f1f3f5;
+                transition: background-color 0.2s ease;
+            }
+
+            .table a {
+                text-decoration: none;
+                color: #212529;
+                transition: color 0.2s;
+            }
+
+            .table a:hover {
+                color: #0d6efd;
+            }
+
+            .text-center {
+                text-align: center;
+            }
+
+            h4 {
+                margin-bottom: 1rem;
+                font-weight: 600;
+                color: #333;
+            }
+            .table-container {
+                max-height: 400px;   /* 테이블 최대 높이 */
+                overflow-y: auto;    /* 내용 많으면 세로 스크롤 */
+            }
+        </style>
+    </section>
+
+
+</div>

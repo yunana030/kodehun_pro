@@ -1,0 +1,156 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout.html}" xmlns="http://www.w3.org/1999/html">
+
+<section id="resources" layout:fragment="content" style="padding-top: 100px;">
+
+    <div class="tabs-and-search">
+        <!-- 카테고리 버튼 -->
+        <div class="resource-tabs">
+            <a th:href="@{/place/list(keyword=${keyword}, type=${type})}"
+               th:classappend="${category}==null ? 'active'" class="reallywant">전체보기</a>
+            <a th:href="@{/place/list(category='TOUR', keyword=${keyword}, type=${type})}" class="reallywant">TOUR</a>
+            <a th:href="@{/place/list(category='HOTEL', keyword=${keyword}, type=${type})}" class="reallywant">HOTEL</a>
+            <a th:href="@{/place/list(category='CAFE', keyword=${keyword}, type=${type})}" class="reallywant">CAFE</a>
+            <a th:href="@{/place/list(category='RESTR', keyword=${keyword}, type=${type})}" class="reallywant">RESTR</a>
+        </div>
+
+        <!-- 검색 -->
+        <form th:action="@{/place/list}" method="get" class="yuna-search-box">
+<!--        검색 카테고리 설정-->
+            <div class="yuna-search-wrapper">
+                <select name="type" class="yuna-search-type" >
+                    <option value="all" th:selected="${type=='all'}">----</option>
+                    <option value="pn" th:selected="${type=='pn'}">장소명</option>
+                    <option value="s" th:selected="${type=='s'}">지역</option>
+                    <option value="c" th:selected="${type=='c'}">내용</option>
+                    <option value="u" th:selected="${type=='u'}">작성자</option>
+                </select>
+            </div>
+
+<!--        검색할 때 선택한 카테고리가 유지되게-->
+            <input type="hidden" name="category" th:value="${category}">
+<!--         검색란-->
+            <input type="text" name="keyword" th:value="${keyword}" placeholder="검색어를 입력" class="yuna-search-input">
+<!--         검색버튼-->
+            <button type="submit" class="yuna-search-btn">검색</button>
+            <a class="yuna-search-btn" th:href="@{/place/list}">초기화</a>
+        </form>
+    </div>
+
+    <!-- 카드 리스트 부분 -->
+    <div class="resource-list">
+        <div th:each="place : ${places}" class="resource-card">
+
+            <!-- 이미지 클릭 시 상세보기 -->
+            <a th:href="@{/place/view/{id}(id=${place.id}, page=${pageInfo.page}, size=${pageInfo.size}, category=${category}, keyword=${keyword}, type=${type})}">
+                <div class="resource-image">
+                    <div class="resource-thumbnail"
+                         th:if="${place.images != null and !place.images.isEmpty()}"
+                         th:style="'background-image: url(' + @{/uploads/} + ${place.images[0].uuid} + '_' + ${place.images[0].fileName} + ')'">
+                    </div>
+                </div>
+            </a>
+
+            <!-- 텍스트 클릭 시 상세보기 -->
+            <a th:href="@{/place/view/{id}(id=${place.id}, page=${pageInfo.page}, size=${pageInfo.size}, category=${category}, keyword=${keyword}, type=${type})}">
+                <div class="resource-body">
+                    <h3 th:text="${place.placename}" class="place-name-detail">Place Name</h3>
+                    <p class="place-content" th:text="${place.addr}">Place Addr</p>
+                    <p class="place-description" th:text="${place.content}">Place description</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- 등록 버튼 -->
+    <div class="text-end mt-3">
+        <a th:href="@{/place/register}">
+            <button type="button" class="reallywant">글 등록</button>
+        </a>
+    </div>
+
+        <!-- 페이지 버튼 -->
+    <div>
+        <ul class="pagination pagination-rounded mx-auto mb-0">
+            <li class="page-item" th:if="${pageInfo.prev}">
+                <a class="page-link"
+                   th:href="@{/place/list(page=${pageInfo.start-1}, size=${pageInfo.size}, category=${category} != null ? ${category} : '')}">
+                    &laquo; 이전
+                </a>
+            </li>
+
+            <th:block th:each="i : ${#numbers.sequence(pageInfo.start, pageInfo.end)}">
+                <li th:class="${i == pageInfo.page} ? 'page-item active' : 'page-item'">
+                    <a class="page-link"
+                       th:href="@{/place/list(page=${i}, size=${pageInfo.size}, category=${category} != null ? ${category} : '')}">
+                        [[${i}]]
+                    </a>
+                </li>
+            </th:block>
+
+            <li class="page-item" th:if="${pageInfo.next}">
+                <a class="page-link"
+                   th:href="@{/place/list(page=${pageInfo.end+1}, size=${pageInfo.size}, category=${category} != null ? ${category} : '')}">
+                    다음 &raquo;
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <style>
+        /* 카드 리스트용 장소명 스타일 (상세페이지와 동일, 밑줄 비교용) */
+        .resource-body{
+            padding: 15px;
+        }
+        .resource-body .place-name-detail {
+            font-size: 1.35rem;                   /* 장소명 크기 */
+            font-weight: 700;                      /* 살짝 강조 */
+            color: #333;                           /* 글자 색 */
+            font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+            margin: 0;
+            display: inline-block;                 /* 글자 길이에 맞춘 밑줄 */
+        }
+
+        /* 카드 리스트용 place-content */
+        .resource-body .place-content {
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.5;
+            font-size: 1rem;
+            color: #777;
+            font-weight: 580;   /* 살짝 굵게 */
+        }
+        .place-description{
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.5;
+            font-size: 1rem;   /* place-name-detail보다 살짝 작게 */
+            color: rgb(51, 51, 51);
+        }
+    </style>
+
+
+<!--카테고리 버튼 클릭시 css색깔이 유지되게-->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const tabs = document.querySelectorAll('.reallywant');
+            const urlParams = new URLSearchParams(window.location.search);
+            const category = urlParams.get('category');
+
+            tabs.forEach(tab => {
+                // 전체보기 처리
+                if (!category && tab.getAttribute('href').endsWith('/place/list')) {
+                    tab.classList.add('active');
+                }
+                // 특정 카테고리 처리
+                else if (category && tab.getAttribute('href').includes('category=' + category)) {
+                    tab.classList.add('active');
+                }
+            });
+        });
+    </script>
+</section>
+</html>

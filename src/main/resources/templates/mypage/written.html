@@ -1,0 +1,193 @@
+<div layout:fragment="mypage_content"
+     xmlns:th="http://www.thymeleaf.org"
+     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+     layout:decorate="~{layout/mypage_layout.html}">
+
+    <h2>내가 작성한 글</h2>
+    <div class="mypage-sections-container">  <-- 가로 정렬 컨테이너
+    <!-- Place 섹션 -->
+        <section class="mypage-section">
+            <div class="free-detail-card">
+                <h4>Place</h4>
+
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">게시글번호</th>
+                        <th scope="col">장소명</th>
+                        <th scope="col">카테고리</th>
+                        <th scope="col">지역</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="place : ${placeResponse.dtoList}">
+                        <th scope="row">[[${place.id}]]</th>
+                        <td>
+                            <a th:href="@{'/place/view/' + ${place.id}}" th:text="${place.placename}" target="_blank"></a>
+                        </td>
+                        <td th:text="${place.category}"></td>
+                        <td th:text="${place.sido}"></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(placeResponse.dtoList)}">
+                        <td colspan="4" class="text-center">작성한 글이 없습니다.</td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <!-- 페이지네이션 -->
+                <div class="text-center mb-3">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:if="${placeResponse.prev}">
+                            <a class="page-link"
+                               th:href="@{/mypage/written(placePage=${placeResponse.start-1}, freePage=${freePage}, size=${size})}">Previous</a>
+                        </li>
+
+                        <th:block th:each="i : ${#numbers.sequence(placeResponse.start, placeResponse.end)}">
+                            <li th:class="${placeResponse.page == i} ? 'page-item active' : 'page-item'">
+                                <a class="page-link"
+                                   th:href="@{/mypage/written(placePage=${i}, freePage=${freePage}, size=${size})}">[[${i}]]</a>
+                            </li>
+                        </th:block>
+
+                        <li class="page-item" th:if="${placeResponse.next}">
+                            <a class="page-link"
+                               th:href="@{/mypage/written(placePage=${placeResponse.end+1}, freePage=${freePage}, size=${size})}">Next</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Free 섹션 -->
+        <section class="mypage-section">
+            <div class="free-detail-card">
+                <h4>Free</h4>
+
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">게시글번호</th>
+                        <th scope="col">제목</th>
+                        <th scope="col">RegDate</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="free : ${freeResponse.dtoList}">
+                        <th scope="row">[[${free.id}]]</th>
+                        <td>
+                            <a th:href="@{'/free/read?id=' + ${free.id}}" th:text="${free.title}" target="_blank"></a>
+                        </td>
+                        <td th:text="${#temporals.format(free.regDate,'yyyy-MM-dd HH:mm:ss')}"></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(freeResponse.dtoList)}">
+                        <td colspan="4" class="text-center">작성한 글이 없습니다.</td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <!-- 페이지네이션 -->
+                <div class="text-center mb-3">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:if="${freeResponse.prev}">
+                            <a class="page-link"
+                               th:href="@{/mypage/written(placePage=${placePage}, freePage=${freeResponse.start-1}, size=${size})}">Previous</a>
+                        </li>
+
+                        <th:block th:each="i : ${#numbers.sequence(freeResponse.start, freeResponse.end)}">
+                            <li th:class="${freeResponse.page == i} ? 'page-item active' : 'page-item'">
+                                <a class="page-link"
+                                   th:href="@{/mypage/written(placePage=${placePage}, freePage=${i}, size=${size})}">[[${i}]]</a>
+                            </li>
+                        </th:block>
+
+                        <li class="page-item" th:if="${freeResponse.next}">
+                            <a class="page-link"
+                               th:href="@{/mypage/written(placePage=${placePage}, freePage=${freeResponse.end+1}, size=${size})}">Next</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+</div>
+
+    <!-- 스타일 적용 -->
+    <style>
+        /* 카드 스타일 (favoritePlaces와 동일) */
+        .free-detail-card {
+            background: #fff;                             /* 카드 배경색 */
+            border-radius: 1.2rem;                        /* 모서리 둥글게 */
+            padding: 2.5rem;                              /* 안쪽 여백 */
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);  /* 그림자 효과 */
+            transition: 0.3s;                             /* hover 등 전환 부드럽게 */
+            margin: 50px auto;                            /* 위아래 여백 + 중앙 정렬 */
+            max-width: 1200px;                            /* 최대 너비 */
+            overflow: hidden;                             /* 카드 넘침 숨김 */
+        }
+
+        /* 테이블 컨테이너 (스크롤 가능) */
+        .table-container {
+            max-height: 400px;    /* 테이블 최대 높이 */
+            overflow-y: auto;     /* 내용 많으면 세로 스크롤 */
+        }
+
+        /* 테이블 스타일 */
+        .free-detail-card .table {
+            border-radius: 0.8rem;
+            width: 100%;
+            margin-top: 1rem;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        .free-detail-card .table thead {
+            background-color: #f8f9fa;
+        }
+
+        .free-detail-card .table th,
+        .free-detail-card .table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e9ecef;
+            text-align: left;
+        }
+
+        .free-detail-card .table tbody tr:hover {
+            background-color: #f1f3f5;
+            transition: background-color 0.2s ease;
+        }
+
+        .free-detail-card .table a {
+            text-decoration: none;
+            color: #212529;
+            transition: color 0.2s;
+        }
+
+        .free-detail-card .table a:hover {
+            color: #0d6efd;
+        }
+
+        /* 섹션 제목 */
+        .free-detail-card h4 {
+            margin-bottom: 1rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* 페이지네이션 중앙 정렬 */
+        .free-detail-card .pagination {
+            justify-content: center;
+        }
+
+        /* 텍스트 가운데 정렬 */
+        .text-center {
+            text-align: center;
+        }
+
+        h4 {
+            margin-bottom: 1rem;
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: #333;
+        }
+    </style>
+
+</div>

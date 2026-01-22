@@ -1,0 +1,47 @@
+<div th:fragment="place_table">
+    <table class="table">
+        <thead>
+        <tr>
+            <th>번호</th>
+            <th>제목</th>
+            <th>작성자</th>
+            <th>작성일</th>
+            <th>조회수</th>
+            <th> </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${placePage.dtoList}">
+            <td th:text="${item.id}"></td>
+            <td th:text="${item.placename}"></td>
+            <td th:text="${item.username}"></td>
+            <td th:text="${#temporals.format(item.regDate, 'yyyy-MM-dd HH:mm')}"></td>
+            <td th:text="${item.readCount}"></td>
+            <td>
+                <a th:href="@{/place/view/{id}(id=${item.id})}" target="_blank">
+                    <button class="admin-btn">상세보기</button>
+                </a>
+                <button class="admin-btn" th:onclick="|deletePlace(${item.id})|">삭제</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <nav>
+        <ul class="pagination">
+            <li class="page-item" th:if="${placePage.prev}">
+                <a class="page-link" href="javascript:void(0)"
+                   th:onclick="|loadPlaceList(${placePage.start - 1}, ${placePage.size})|">Previous</a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(placePage.start, placePage.end)}"
+                th:classappend="${i == placePage.page} ? 'active'">
+                <a class="page-link" href="javascript:void(0)"
+                   th:onclick="|loadPlaceList(${i}, ${placePage.size})|"
+                   th:text="${i}">1</a>
+            </li>
+            <li class="page-item" th:if="${placePage.next}">
+                <a class="page-link" href="javascript:void(0)"
+                   th:onclick="|loadPlaceList(${placePage.end + 1}, ${placePage.size})|">Next</a>
+            </li>
+        </ul>
+    </nav>
+</div>

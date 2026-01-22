@@ -1,0 +1,12 @@
+<!-- Ko-데헌 | Mono Icon -->
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120" role="img" aria-label="Ko-데헌 모노 아이콘">
+  <g fill="#0F172A">
+    <circle cx="60" cy="60" r="56" fill="#0F172A" opacity="0.08"/>
+    <path d="M30 26 v68 h9 V67 l29 27 h14 L64 59l23-25H74L39 62 V26 Z"/>
+    <g transform="translate(60,60)">
+      <circle r="18" fill="none" stroke="#0F172A" stroke-width="4"/>
+      <circle r="4" fill="#0F172A"/>
+      <path d="M0,-26 V-18 M0,18 V26 M-26,0 h8 M18,0 h8" stroke="#0F172A" stroke-width="4" stroke-linecap="round"/>
+    </g>
+  </g>
+</svg>

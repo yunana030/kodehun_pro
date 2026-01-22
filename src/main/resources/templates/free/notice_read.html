@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout/layout.html}">
+
+<head>
+    <meta charset="UTF-8">
+    <title>공지사항 상세보기</title>
+</head>
+
+<section layout:fragment="content" class="meditation-notice">
+
+    <!-- 로그인 안된 경우 -->
+    <div th:unless="${#authorization.expression('isAuthenticated()')}"
+         class="text-center py-5">
+        <h3 class="text-muted mb-4">로그인 후 이용 가능합니다.</h3>
+    </div>
+
+    <!-- 로그인 된 경우 -->
+    <div th:if="${#authorization.expression('isAuthenticated()')}" class="glass-card">
+
+        <h3 class="notice-title">공지사항 상세보기</h3>
+
+        <div class="notice-meta">
+            <span class="meta-item"><strong>제목</strong> <span th:text="${notice.title}"></span></span>
+            <span class="meta-item"><strong>작성자</strong> <span th:text="${notice.writer}"></span></span>
+            <span class="meta-item"><strong>작성일</strong>
+                <span th:text="${#temporals.format(notice.regDate, 'yyyy-MM-dd HH:mm')}"></span>
+            </span>
+        </div>
+
+        <div class="notice-content">
+            <div class="notice-box">
+                <p th:text="${notice.content}"></p>
+            </div>
+        </div>
+
+        <div class="btn-actions">
+            <a th:href="@{/free/list}" class="reallywant">목록</a>
+        </div>
+    </div>
+
+    <style>
+        .meditation-notice {
+            min-height: calc(77vh);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            padding: 3rem 1rem 2rem;
+            margin-top: 40px;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 28px;
+            padding: 3rem 2.5rem;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.5);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes floatCard {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-6px) rotate(0.3deg); }
+        }
+
+        /* 제목 */
+        .notice-title {
+            font-size: 2.1rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #2D5A87, #6B9B7A);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+        }
+        .notice-title::after {
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            width: 50px;
+            height: 3px;
+            background: var(--gradient-1);
+            border-radius: 2px;
+            transform: translateX(-50%);
+            opacity: 0.6;
+        }
+
+        /* 메타 정보 */
+        .notice-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            padding: 1.2rem;
+            background: rgba(45, 90, 135, 0.05);
+            border-radius: 16px;
+        }
+        .meta-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1rem;
+            color: #475569;
+        }
+        .meta-item strong {
+            color: #2D5A87;
+            min-width: 70px;
+        }
+
+        /* 내용 */
+        .notice-content {
+            display: flex;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .notice-box {
+            width: 100%;
+            min-height: 243px;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1.5px solid rgba(45, 90, 135, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem 1.8rem;
+            font-size: 1.05rem;
+            color: #334155;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            word-break: break-word;
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.04);
+        }
+
+        /* 버튼 */
+        .btn-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        /* .reallywant 스타일 재사용 */
+        .reallywant {
+            padding: 0.8rem 2rem;
+            background: white;
+            border: 2px solid var(--primary);
+            border-radius: 25px;
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .reallywant:hover {
+            background: var(--gradient-1);
+            color: white;
+            border-color: transparent;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(45, 90, 135, 0.25);
+        }
+
+        /* 반응형 */
+        @media (max-width: 576px) {
+            .glass-card {
+                padding: 2rem 1.5rem;
+                border-radius: 20px;
+            }
+            .notice-title {
+                font-size: 1.8rem;
+            }
+            .notice-meta {
+                padding: 1rem;
+                font-size: 0.95rem;
+            }
+            .notice-content {
+                font-size: 1rem;
+                padding: 1rem;
+            }
+            .btn-actions {
+                justify-content: center;
+            }
+            .reallywant {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</section>
+</html>

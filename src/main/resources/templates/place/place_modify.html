@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout.html}">
+<head>
+    <title>글쓰기</title>
+
+    <!-- 페이지 전용 스타일 -->
+    <style>
+        .writing-card {
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background-color: #ffffff;
+        }
+        textarea.form-control {
+            min-height: 400px;
+            resize: vertical;
+        }
+    </style>
+
+    <!-- 별도 CSS 파일 -->
+    <link rel="stylesheet" th:href="@{/css/writing.css}">
+</head>
+
+<body>
+
+<section layout:fragment="content" class="meditation-write" style="margin: 0; padding-top: 75px">
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <form th:action="@{/place/modify}" method="post" enctype="multipart/form-data" class="glass-card">
+                    <input type="hidden" name="id" th:value="${place.id}">
+                    <!-- 글쓰기 카드 -->
+
+                        <!-- 장소명 -->
+                        <div class="form-group">
+                            <label for="placename" class="form-label">장소</label>
+                            <input type="text" id="placename" name="placename" class="form-control"
+                                   th:value="${place.placename}">
+                        </div>
+
+                        <!-- 카테고리한 줄 -->
+                        <div class="mb-3 row">
+                            <div class="col">
+                                <label for="category" class="form-label">카테고리</label>
+                                <select id="category" name="category" class="form-select">
+                                    <option value="" th:selected="${#strings.equals(place.category, null)}">선택하세요</option>
+                                    <option value="TOUR" th:selected="${#strings.equals(place.category, 'TOUR')}">여행</option>
+                                    <option value="HOTEL" th:selected="${#strings.equals(place.category, 'HOTEL')}">호텔</option>
+                                    <option value="CAFE" th:selected="${#strings.equals(place.category, 'CAFE')}">카페</option>
+                                    <option value="RESTR" th:selected="${#strings.equals(place.category, 'RESTR')}">식당</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 시도 + 구군 한 줄 -->
+                        <div class="form-group">
+                            <label for="sido" class="form-label">시도</label>
+                            <select id="sido" name="sido" class="form-select">
+                                <option value="" th:selected="${place.sido == null}">선택</option>
+                                <option value="서울" th:selected="${place.sido == '서울'}">서울</option>
+                                <option value="경기" th:selected="${place.sido == '경기'}">경기</option>
+                                <option value="세종" th:selected="${place.sido == '세종'}">세종</option>
+                                <option value="부산" th:selected="${place.sido == '부산'}">부산</option>
+                                <option value="대구" th:selected="${place.sido == '대구'}">대구</option>
+                                <option value="인천" th:selected="${place.sido == '인천'}">인천</option>
+                                <option value="광주" th:selected="${place.sido == '광주'}">광주</option>
+                                <option value="대전" th:selected="${place.sido == '대전'}">대전</option>
+                                <option value="울산" th:selected="${place.sido == '울산'}">울산</option>
+                                <option value="강원도" th:selected="${place.sido == '강원도'}">강원도</option>
+                                <option value="충청도" th:selected="${place.sido == '충청도'}">충청도</option>
+                                <option value="전라도" th:selected="${place.sido == '전라도'}">전라도</option>
+                                <option value="경상도" th:selected="${place.sido == '경상도'}">경상도</option>
+                                <option value="제주도" th:selected="${place.sido == '제주도'}">제주도</option>
+                            </select>
+                        </div>
+                        <!-- 주소 -->
+                    <div class="form-group">
+                        <label for="addr" class="form-label">주소</label>
+                        <input type="text" name="addr" id="addr" class="form-control"
+                               th:value="${place.addr}">
+                    </div>
+
+                    <!-- 기존 업로드 파일 표시 -->
+                    <div class="form-group">
+                        <label for="images">파일 업로드</label>
+
+                        <!-- 기존 업로드 파일 표시 (파일명만) -->
+                        <div class="existing-files mb-2" th:if="${place.images}">
+                            <div th:each="img : ${place.images}" class="file-name mb-1">
+                                <span>[[${img.fileName}]]</span>
+                            </div>
+                        </div>
+
+                        <!-- 새 이미지/파일 업로드 -->
+                        <input type="file" id="images" name="files" class="form-control" multiple>
+                    </div>
+
+                    <!-- 내용 -->
+                    <div class="form-group">
+                        <label for="content" class="form-label">내용</label>
+                        <textarea id="content" name="content" class="form-control">[[${place.content}]]</textarea>
+                    </div>
+
+                        <!-- 버튼 -->
+                    <div class="btn-actions" style="display:flex; gap:10px; justify-content:flex-end;">
+                        <button type="submit" class="reallywant">수정</button>
+                        <a th:href="@{/place/list}">
+                            <button type="button" class="reallywant">목록</button>
+                        </a>
+                    </div>
+
+
+                </form>
+            </div> <!-- /.col-md-10 -->
+        </div> <!-- /.row -->
+    </div> <!-- /.container -->
+
+    <style>
+
+
+        .col-md-10 {
+            display: flex;
+            justify-content: center;  /* 가로 중앙 */
+        }
+        .col-md-10 .glass-card {
+            width: 100%;           /* 필요시 max-width 유지 */
+            max-width: 860px;      /* 기존 글래스카드 최대 폭 */
+        }
+        /* 메인 글쓰기 전용 스타일 */
+        .meditation-write {
+            min-height: calc(77vh);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            padding: 3rem 1rem 2rem;
+            margin-top: 40px;
+        }
+
+        /* 배경 파티클 */
+        .meditation-write::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                    radial-gradient(circle at 20% 80%, rgba(136, 176, 211, 0.15) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(107, 91, 149, 0.1) 0%, transparent 50%),
+                    linear-gradient(135deg, #f8faff 0%, #e6f0ff 100%);
+            animation: breatheBg 12s ease-in-out infinite;
+            z-index: -2;
+        }
+
+        @keyframes breatheBg {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.02); }
+        }
+
+        /* 유리 카드 */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.78);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 28px;
+            padding: 3rem 2.5rem;
+            max-width: 860px;
+            width: 100%;
+            box-shadow:
+                    0 8px 32px rgba(0, 0, 0, 0.08),
+                    0 0 0 1px rgba(255, 255, 255, 0.5);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 30px;
+            margin-bottom: 80px;
+            margin-top: -40px;
+
+        }
+
+        @keyframes floatCard {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(0.5deg); }
+        }
+
+        /* 요소 등장 애니메이션 */
+        .glass-card > * {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease forwards;
+        }
+        .glass-card h3 { animation-delay: 0.1s; }
+        .glass-card .form-group:nth-child(2) { animation-delay: 0.2s; }
+        .glass-card .form-group:nth-child(3) { animation-delay: 0.3s; }
+        .glass-card .form-group:nth-child(4) { animation-delay: 0.4s; }
+        .glass-card .form-group:nth-child(5) { animation-delay: 0.5s; }
+        .glass-card .form-group:nth-child(6) { animation-delay: 0.6s; }
+        .glass-card .form-group:nth-child(7) { animation-delay: 0.7s; }
+        .glass-card .btn-actions { animation-delay: 0.8s; }
+
+        /* 제목 */
+        .glass-card h3 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 2.5rem;
+            background: linear-gradient(135deg, #2D5A87, #6B9B7A);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+        }
+
+        /* 입력 그룹 */
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        .form-group label {
+            color: #64748b;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            display: block;
+            transition: all 0.4s ease;
+        }
+
+        /* 텍스트 입력 */
+        .form-control, .form-select {
+            border: none;
+            border-bottom: 2px solid rgba(45, 90, 135, 0.2);
+            padding: 0.75rem 0;
+            background: transparent;
+            font-size: 1.1rem;
+            transition: all 0.4s ease;
+        }
+        .form-control:focus, .form-select:focus {
+            border-bottom-color: var(--primary);
+            outline: none;
+            background: transparent;
+        }
+
+        .form-control[type="file"] {
+            padding: 0.8rem 0;
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            color: #64748b;
+            cursor: pointer;
+            display: block;
+            width: 100%;
+            position: relative;
+        }
+
+        /* 크롬/사파리/엣지 */
+        .form-control[type="file"]::-webkit-file-upload-button {
+            padding: 0.5rem 1.5rem;       /* 세로/가로 패딩 줄임 */
+            min-width: 110px;             /* 최소 너비 줄임 */
+            background: white;
+            border: 2px solid var(--primary);
+            border-radius: 25px;
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            outline: none;
+            position: relative;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            margin: 0;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(45, 90, 135, 0.1);
+            margin-right: 10px; /* 여기서 기본 간격 설정 */
+        }
+        /* 호버 & active 효과 – .reallywant와 동일 */
+        .form-control[type="file"]::-webkit-file-upload-button:hover,
+        .form-control[type="file"]::file-selector-button:hover,
+        .form-control[type="file"]::-webkit-file-upload-button:active,
+        .form-control[type="file"]::file-selector-button:active {
+            background: var(--gradient-1);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 8px 20px rgba(45, 90, 135, 0.25);
+            transform: translateY(-2px);
+        }
+
+        /* textarea */
+        #content {
+            min-height: 220px !important;
+            resize: none;
+            padding-top: 1rem;
+        }
+
+        /* 반응형 */
+        @media (max-width: 576px) {
+            .glass-card {
+                padding: 2rem 1.5rem;
+                border-radius: 20px;
+            }
+            .glass-card h3 {
+                font-size: 1.8rem;
+            }
+            .btn-actions {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            .breathe-btn, .btn-soft {
+                width: 100%;
+                padding: 0.85rem 1.5rem;
+            }
+            .row > .col {
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+
+
+
+</section>
+
+</body>
+</html>

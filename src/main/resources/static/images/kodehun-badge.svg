@@ -1,0 +1,16 @@
+<!-- Ko-데헌 | Badge -->
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160" role="img" aria-label="Ko-데헌 배지">
+  <defs>
+    <linearGradient id="gradKo2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2F5FE0"/>
+      <stop offset="1" stop-color="#2CE38F"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="160" height="160" rx="32" fill="url(#gradKo2)"/>
+  <path d="M46 36 v88 h12 V94 l34 30 h18 L86 86l30-32H98L58 82 V36 Z" fill="#ffffff" opacity="0.95"/>
+  <g transform="translate(104,56)">
+    <circle r="22" cx="0" cy="24" fill="none" stroke="#ffffff" stroke-width="4"/>
+    <circle r="5" cx="0" cy="24" fill="#ffffff"/>
+    <path d="M0,0 v10 M0,38 v10 M-24,24 h-10 M24,24 h10" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg>
