@@ -78,4 +78,22 @@ public class Place extends BaseEntity {
     public void upReadcount() {
         readcount++;
     }
+
+//좋아요 및 즐겨찾기, 댓글이 있는 게시물 삭제시 같이 삭제
+    @OneToMany(mappedBy = "place",
+            cascade = CascadeType.REMOVE,
+            orphanRemoval = true)
+    private Set<Like> likes = new HashSet<>();
+
+    @OneToMany(mappedBy = "place",
+            cascade = CascadeType.REMOVE,
+            orphanRemoval = true)
+    private Set<Favorite> favorites = new HashSet<>();
+
+    @OneToMany(mappedBy = "place",
+            cascade = CascadeType.REMOVE,
+            orphanRemoval = true)
+    private Set<Reply> replies = new HashSet<>();
+
+
 }

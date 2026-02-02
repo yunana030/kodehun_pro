@@ -164,16 +164,30 @@ nav {
 }
 
 /* Hero Section with Enhanced Animated Background */
-#hero {
-	min-height: 100%;
-	display: grid;
-	align-items: center;
-	justify-content: center;
-	background: var(--gradient-2);
-	position: relative;
-	margin-top: 3rem;
-	overflow: hidden;
+/*#hero {*/
+/*	min-height: 100%;*/
+/*	display: block;*/
+/*	align-items: center;*/
+/*	justify-content: center;*/
+/*    position: relative;*/
+/*	margin-top: 3rem;*/
+/*	overflow: hidden;*/
+/*    background-image:  url('images/코데헌_배너_후보1.jpg');*/
+/*    background-position: center;*/
+/*    background-size: cover;*/
+/*    text-align: left;*/
+/*}*/
+/*#hero {*/
+/*    padding: 6rem 8rem 6rem 8rem;*/
+/*}*/
+/*#hero h1 {*/
+/*    font-family: 'Pacifico', cursive;*/
+/*}*/
+
+body {
+    font-family: 'Noto Sans KR', sans-serif;
 }
+
 
 /* Central Light Core */
 #hero::before {
@@ -189,6 +203,7 @@ nav {
 }
 
 /* ===== Hero 영역 ===== */
+
 .hero{ position:relative; min-height:440px; display:flex; align-items:center; }
 .hero-bg-gradient{
     position:absolute; inset:0;
@@ -201,6 +216,9 @@ nav {
     background: linear-gradient(180deg,#e8eff7,#5ea0ff 85%);
     color:#20304a;
 }
+
+
+
 
 .hero--short{ min-height: 48vh; padding: 4rem 0 3rem; }
 @media (max-width: 768px){
@@ -2214,4 +2232,152 @@ a {
     background: var(--gradient-1);
     color: white;
     border-color: transparent;
+}
+
+
+
+/*배너 변경*/
+/* ---------- 유나 전용 히어로 (충돌 방지 버전) ---------- */
+
+#travel-hero {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    overflow: hidden;
+    background: #e8f4f8;   /* 연한 하늘톤 기본 배경 */
+}
+
+/* 파란 곡선 */
+.travel-hero-curve {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 75%;
+    background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+    border-radius: 0 0 50% 50% / 0 0 50% 50%;
+    z-index: 0;
+}
+
+/* 배경 이미지 */
+.travel-hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+}
+
+/* 구름 */
+.travel-cloud {
+    position: absolute;
+    background: white;
+    border-radius: 50px;
+    opacity: 0.7;
+}
+
+.travel-cloud1 {
+    width: 80px;
+    height: 40px;
+    top: 80px;
+    left: 10%;
+}
+
+.travel-cloud2 {
+    width: 100px;
+    height: 50px;
+    top: 120px;
+    right: 15%;
+}
+
+.travel-cloud3 {
+    width: 60px;
+    height: 30px;
+    top: 180px;
+    left: 30%;
+}
+
+/* 텍스트 영역 */
+.travel-hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    color: white;
+    max-width: 900px;
+    margin: 0 auto;
+    padding-top: 8rem;   /* 상하 위치 조절용 */
+    font-weight: 900;
+}
+
+.travel-hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 72px;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+    font-weight: 900;
+}
+.travel-hero p {
+    font-size: 1.4rem;
+}
+.travel-hero-content p {
+    font-family: 'Noto Serif KR', serif;
+}
+
+@media (max-width: 768px) {
+    #travel-hero { height: 500px; }
+
+    .travel-cloud { display: none; }
+
+    .travel-hero-content {
+        margin-left: 2rem;
+        padding-top: 6rem;
+        z-index: 10;
+    }
+}
+
+.travel-hero-building {
+    position: absolute;
+    right: 0;
+    z-index: 3;      /* 곡선 위로 올라오게 */
+}
+
+.travel-hero-building img {
+    width: 100%;
+    height: auto;
+}
+
+.b2 {
+    width: 400px;    /* 이미지 크기 조절 */
+    bottom: -10px;
+    left: 23%;
+    z-index: 5;
+}
+
+.b1 {
+    width: 400px;
+    bottom: -10px;
+    left: 8%;
+    z-index: 5;
+}
+
+.b3{
+    width: 700px;
+    bottom: -10px;
+    right: 5%;
+}
+
+.b4{
+    width: 400px;
+    bottom : 50%;
+    left: 10%;
+    z-index: 5;
+}
+
+.b5{
+    width: 450px;
+    left: -4%;
+    bottom:-30px;
+    z-index: 1;
+
 }
