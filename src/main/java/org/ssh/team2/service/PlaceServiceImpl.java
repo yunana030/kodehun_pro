@@ -108,7 +108,7 @@ public class PlaceServiceImpl implements PlaceService {
     //     return entityToDto(place);
     // }
 
-//    장소 게시글 리스트
+//    (초기)장소 게시글 리스트 확인용
     @Override
     public List<PlaceDTO> getAllPlaces() {
         List<Place> places = placeListRepository.findAll();
