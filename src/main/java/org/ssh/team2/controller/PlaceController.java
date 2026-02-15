@@ -72,7 +72,6 @@ public class PlaceController {
         model.addAttribute("category", placeCategory);
         model.addAttribute("keyword", keyword);
         model.addAttribute("searchFilter", searchFilter);
-//        일단 추가는 해보겟는데....
         model.addAttribute("type", type); // 검색타입 유지,
 
         return "place/place_list";
@@ -99,58 +98,6 @@ public class PlaceController {
         return "place/place_view"; //
     }
 
-    // 좋아요
-    @PostMapping("/{placeId}/like")
-    @ResponseBody
-    public int likePlace(@PathVariable Long placeId, Principal principal) {
-        if (principal == null) {
-            // 로그인 안 된 사용자 → 좋아요 불가
-            return -1;  // 프론트에서 -1이면 로그인 필요 처리
-        }
-//        String username = userDetails.getUsername(); // 로그인한 회원
-        return likeService.likePlace(principal.getName(), placeId);
-    }
-    //좋아요 상태조회
-    @GetMapping("/{placeId}/like/status")
-    @ResponseBody
-    public Map<String, Object> getLikeStatus(@PathVariable Long placeId, Principal principal) {
-        int count = placeService.getLikeCount(placeId);
-        boolean liked = false;
-        if (principal != null) {
-            String username = principal.getName();
-            liked = likeService.hasUserLiked(username, placeId);
-        }
-        Map<String, Object> result = new HashMap<>();
-        result.put("liked", liked);
-        result.put("count", count);
-        return result;
-    }
-
-    //    즐겨찾기!!!!!!
-    @PostMapping("/{placeId}/favorite")
-    @ResponseBody
-    public boolean favoritePlace(@PathVariable Long placeId, Principal principal) {
-        if (principal == null) return false;
-        return favoriteService.favoritePlace(principal.getName(), placeId);
-    }
-
-    // 페이지를 열 때 즐찾이 되어있으면 색깔이 입혀져 나옴!
-    @GetMapping("/{placeId}/favorite/status")
-    @ResponseBody
-    public Map<String, Object> getFavoriteStatus(@PathVariable Long placeId,Principal principal) {
-        boolean favorited = false;
-        boolean loginRequired = false;
-        if (principal != null) {
-            favorited = favoriteService.isFavorite(principal.getName(), placeId);
-        } else {
-            loginRequired = true; // 로그인 안 되어 있음
-        }
-
-        return Map.of(
-                "favorited", favorited,
-                "loginRequired", loginRequired
-        );
-    }
 
     // 장소글 등록
     @GetMapping("/register")
@@ -214,12 +161,12 @@ public class PlaceController {
                 !uploadFileDTO.getFiles().get(0).getOriginalFilename().equals("")) {
 
             // 기존 파일 삭제
-            PlaceDTO existingPlace = placeService.findPlaceById(placeDTO.getId());
+            PlaceDTO existingPlace = placeService.getPlaceById(placeDTO.getId(), 0);    //mode: 0은 조회수 유지용
+            
             List<UploadResultDTO> existingImages = existingPlace.getImages();
             if (existingImages != null && !existingImages.isEmpty()) {
                 removeFiles(existingImages); // 기존 파일 삭제
             }
-
             // 새로 업로드한 파일 정보 얻기
             imageDTOs = fileUpload(uploadFileDTO);
         }
@@ -228,6 +175,7 @@ public class PlaceController {
 
         // 서비스 호출 → 수정
         placeService.modifyPlace(placeDTO);
+        
         redirectAttributes.addAttribute("id", placeDTO.getId());
         return "redirect:/place/view/" + placeDTO.getId();  //상세보기 페이지로 이동
 
@@ -248,8 +196,8 @@ public class PlaceController {
     @GetMapping("/delete/{id}")
     public String deletePlace(@PathVariable Long id) {
         // 먼저 엔티티 조회하고
-        PlaceDTO placeDTO = placeService.findPlaceById(id);
-        if (placeDTO != null) {  // null 체크 추가 -> 삭제할 때 에러 방지??
+        PlaceDTO placeDTO = placeService.getPlaceById(id, 0);
+        if (placeDTO != null) {  // null 체크 추가 -> 삭제할 때 에러 방지
             // 실제 서버 파일 삭제
             List<UploadResultDTO> images = placeDTO.getImages();
             if (images != null && !images.isEmpty()) {
@@ -284,6 +232,62 @@ public class PlaceController {
                 e.printStackTrace();
             }
         }
+    }
+
+
+// ======================================================================================
+
+     // 좋아요
+    @PostMapping("/{placeId}/like")
+    @ResponseBody
+    public int likePlace(@PathVariable Long placeId, Principal principal) {
+        if (principal == null) {
+            // 로그인 안 된 사용자 → 좋아요 불가
+            return -1;  // 프론트에서 -1이면 로그인 필요 처리
+        }
+//        String username = userDetails.getUsername(); // 로그인한 회원
+        return likeService.likePlace(principal.getName(), placeId);
+    }
+    //좋아요 상태조회
+    @GetMapping("/{placeId}/like/status")
+    @ResponseBody
+    public Map<String, Object> getLikeStatus(@PathVariable Long placeId, Principal principal) {
+        int count = placeService.getLikeCount(placeId);
+        boolean liked = false;
+        if (principal != null) {
+            String username = principal.getName();
+            liked = likeService.hasUserLiked(username, placeId);
+        }
+        Map<String, Object> result = new HashMap<>();
+        result.put("liked", liked);
+        result.put("count", count);
+        return result;
+    }
+
+    //    즐겨찾기!!!!!!
+    @PostMapping("/{placeId}/favorite")
+    @ResponseBody
+    public boolean favoritePlace(@PathVariable Long placeId, Principal principal) {
+        if (principal == null) return false;
+        return favoriteService.favoritePlace(principal.getName(), placeId);
+    }
+
+    // 페이지를 열 때 즐찾이 되어있으면 색깔이 입혀져 나옴!
+    @GetMapping("/{placeId}/favorite/status")
+    @ResponseBody
+    public Map<String, Object> getFavoriteStatus(@PathVariable Long placeId,Principal principal) {
+        boolean favorited = false;
+        boolean loginRequired = false;
+        if (principal != null) {
+            favorited = favoriteService.isFavorite(principal.getName(), placeId);
+        } else {
+            loginRequired = true; // 로그인 안 되어 있음
+        }
+
+        return Map.of(
+                "favorited", favorited,
+                "loginRequired", loginRequired
+        );
     }
 
 }
