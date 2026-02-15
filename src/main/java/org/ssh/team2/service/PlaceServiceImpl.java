@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Log4j2
+@Transactional(readOnly = true) // 기본은 읽기 전용 (성능 최적화)
 public class PlaceServiceImpl implements PlaceService {
     @Autowired
     private MemberRepository memberRepository;
@@ -34,14 +36,15 @@ public class PlaceServiceImpl implements PlaceService {
 
     //    장소글 상세보기용
     @Override
+    @Transactional    // 조회수는 수정 개념!
     public PlaceDTO getPlaceById(Long id, Integer mode) {
-        Place place = placeListRepository.findById(id).orElse(null);
+        Place place = placeListRepository.findByIdWithMember(id)
+            .orElseThrow(() -> new IllegalArgumentException("Place not found"));
 
-        if(mode == 1) {
-            place.upReadcount();
-            placeListRepository.save(place);
+        if(mode != null && mode == 1) {
+            place.upReadcount(); // 조회수 증가 (더티 체킹으로 자동 저장)
         }
-
+    
         return entityToDto(place);
     }
 
@@ -65,6 +68,7 @@ public class PlaceServiceImpl implements PlaceService {
     }
 
     @Override
+    @Transactional
     public void modifyPlace(PlaceDTO dto) {
         Place place = placeListRepository.findById(dto.getId()).orElse(null);
 //        변경하려는 영역
@@ -85,7 +89,7 @@ public class PlaceServiceImpl implements PlaceService {
                         imgDTO.isImage());
             }
         }
-        placeListRepository.save(place);
+        // placeListRepository.save(place);    // 더티채킹! save가 없어도 메소드 종료시점에 자동으로 db 반영됨
     }
 
     @Override
@@ -97,12 +101,12 @@ public class PlaceServiceImpl implements PlaceService {
         placeListRepository.delete(place);
     }
 
-    @Override
-    public PlaceDTO findPlaceById(Long id) {
-        Place place = placeListRepository.findByIdWithMember(id)
-                .orElseThrow(() -> new IllegalArgumentException("Place not found"));
-        return entityToDto(place);
-    }
+    // @Override
+    // public PlaceDTO findPlaceById(Long id) {
+    //     Place place = placeListRepository.findByIdWithMember(id)
+    //             .orElseThrow(() -> new IllegalArgumentException("Place not found"));
+    //     return entityToDto(place);
+    // }
 
 //    장소 게시글 리스트
     @Override
