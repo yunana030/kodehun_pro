@@ -21,8 +21,13 @@ public interface PlaceListRepository extends JpaRepository<Place, Long> {
     // 내가쓴글보기위해
     Page<Place> findByMember(Member member, Pageable pageable);
 
-    @Query("SELECT p FROM Place p JOIN FETCH p.member WHERE p.id = :id")
-    Optional<Place> findByIdWithMember(Long id);
+    // member, images는 엔티티 안에 선언된 이름
+    @Query("SELECT p FROM Place p " +
+       "JOIN FETCH p.member " +
+       "LEFT JOIN FETCH p.images " +
+       "WHERE p.id = :id")
+    Optional<Place> findByIdWithMember(Long id);;
+    
     void deleteByMemberId(Long memberId);
 
 }
