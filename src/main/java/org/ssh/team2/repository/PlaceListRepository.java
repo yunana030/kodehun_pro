@@ -26,7 +26,7 @@ public interface PlaceListRepository extends JpaRepository<Place, Long> {
        "JOIN FETCH p.member " +
        "LEFT JOIN FETCH p.images " +
        "WHERE p.id = :id")
-    Optional<Place> findByIdWithMember(Long id);;
+    Optional<Place> findByIdWithMember(Long id);
     
     void deleteByMemberId(Long memberId);
 
