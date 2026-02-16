@@ -50,30 +50,43 @@ public class PlaceController {
     private String uploadPath;
 
 
+    // 
+    // @GetMapping("/list")
+    // public String getPlaces(@RequestParam(required = false) String category,  //
+    //                         PlaceListPageRequestDTO pageRequestDTO,
+    //                         @RequestParam(required = false) String keyword,
+    //                         @RequestParam(required = false) String type,
+    //                         @RequestParam(required = false) String searchFilter,
+    //                         Model model) {
+
+    //     PlaceCategory placeCategory = PlaceCategory.from(category);
+    //     pageRequestDTO.setCategory(placeCategory); // DTO는 이넘이라 적용됨
+
+    //     pageRequestDTO.setKeyword(keyword);
+    //     pageRequestDTO.setType(type);
+    //     pageRequestDTO.setSearchFilter(searchFilter);
+
+    //     PageResponseDTO<PlaceDTO> responseDTO = placeService.getPlacePageList(pageRequestDTO);
+
+    //     model.addAttribute("pageInfo", responseDTO);
+    //     model.addAttribute("places", responseDTO.getDtoList());
+    //     model.addAttribute("category", placeCategory);
+    //     model.addAttribute("keyword", keyword);
+    //     model.addAttribute("searchFilter", searchFilter);
+    //     model.addAttribute("type", type); // 검색타입 유지,
+
+    //     return "place/place_list";
+    // }
+
     @GetMapping("/list")
-    public String getPlaces(@RequestParam(required = false) String category,  //
-                            PlaceListPageRequestDTO pageRequestDTO,
-                            @RequestParam(required = false) String keyword,
-                            @RequestParam(required = false) String type,
-                            @RequestParam(required = false) String searchFilter,
-                            Model model) {
-
-        PlaceCategory placeCategory = PlaceCategory.from(category);
-        pageRequestDTO.setCategory(placeCategory); // DTO는 이넘이라 적용됨
-
-        pageRequestDTO.setKeyword(keyword);
-        pageRequestDTO.setType(type);
-        pageRequestDTO.setSearchFilter(searchFilter);
-
+    public String getPlaces(PlaceListPageRequestDTO pageRequestDTO, Model model) {
+        // 1. 스프링이 URL 파라미터를 pageRequestDTO에 이미 다 채워줌!
+        // 2. 서비스 호출 (서비스가 모든 비즈니스 로직 처리)
         PageResponseDTO<PlaceDTO> responseDTO = placeService.getPlacePageList(pageRequestDTO);
-
-        model.addAttribute("pageInfo", responseDTO);
-        model.addAttribute("places", responseDTO.getDtoList());
-        model.addAttribute("category", placeCategory);
-        model.addAttribute("keyword", keyword);
-        model.addAttribute("searchFilter", searchFilter);
-        model.addAttribute("type", type); // 검색타입 유지,
-
+    
+        // 3. 딱 필요한 것만 모델에 담기
+        model.addAttribute("responseDTO", responseDTO); 
+    
         return "place/place_list";
     }
 
