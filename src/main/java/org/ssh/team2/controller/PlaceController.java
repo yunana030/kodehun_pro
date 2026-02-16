@@ -80,13 +80,12 @@ public class PlaceController {
 
     @GetMapping("/list")
     public String getPlaces(PlaceListPageRequestDTO pageRequestDTO, Model model) {
-        // 1. 스프링이 URL 파라미터를 pageRequestDTO에 이미 다 채워줌!
-        // 2. 서비스 호출 (서비스가 모든 비즈니스 로직 처리)
+        // 스프링이 URL 파라미터를 pageRequestDTO에 이미 다 채워줌!
+        // 서비스 호출 (서비스가 모든 비즈니스 로직 처리)
         PageResponseDTO<PlaceDTO> responseDTO = placeService.getPlacePageList(pageRequestDTO);
     
-        // 3. 딱 필요한 것만 모델에 담기
-        model.addAttribute("responseDTO", responseDTO); 
-    
+        // 딱 필요한 것만 모델에 담기
+        model.addAttribute("responseDTO", responseDTO);
         return "place/place_list";
     }
 
