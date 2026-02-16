@@ -15,11 +15,7 @@ public interface FavoriteRepository extends JpaRepository<Favorite,Long> {
     // 특정 회원 + 장소 즐겨찾기 존재 여부만 확인
     boolean existsByMemberAndPlace(Member member, Place place);
 
-    // 즐찾 해제
-    void deleteByMemberAndPlace(Member member, Place place);
-
     // 마이페이지 -> 자기가 즐찾한 리스트 보여줌
-    List<Favorite> findAllByMember(Member member);
     List<Favorite> findAllByMemberOrderByRegDateDesc(Member member);
 
 
